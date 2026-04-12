@@ -1,0 +1,5 @@
+{
+  "name": "Suno Library Organizer",
+  "description": "A specialized UX utility designed to declutter the Suno experience. It introduces \"Smart Stacks\" to automatically group high-volume generations by prompt, eliminating the endless scroll for power users. This prototype also integrates a \"Smart Lyrics Editor\" for a streamlined, context-aware songwriting process.",
+  "requestFramePermissions": []
+}
