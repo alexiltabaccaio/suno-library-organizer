@@ -67,7 +67,7 @@ export const MobileLayout: React.FC = () => {
             <div className="flex items-center bg-zinc-900/80 rounded-full p-0.5 border border-zinc-800/50">
               <button 
                 onClick={() => setViewMode('before')}
-                className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-full text-[9px] font-bold transition-all ${
                   viewMode === 'before' 
                     ? 'bg-zinc-100 text-black' 
                     : 'text-zinc-500'
@@ -75,16 +75,28 @@ export const MobileLayout: React.FC = () => {
               >
                 Before
               </button>
-              <button 
-                onClick={() => setViewMode('after')}
-                className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${
-                  viewMode === 'after' 
-                    ? 'bg-zinc-100 text-black' 
-                    : 'text-zinc-500'
-                }`}
-              >
-                After
-              </button>
+              <div className="flex items-center ml-0.5 bg-zinc-800/30 rounded-full p-0.5">
+                <button 
+                  onClick={() => setViewMode('v1')}
+                  className={`px-2.5 py-1 rounded-full text-[8px] font-black transition-all ${
+                    viewMode === 'v1' 
+                      ? 'bg-zinc-100 text-black' 
+                      : 'text-zinc-500'
+                  }`}
+                >
+                  V1
+                </button>
+                <button 
+                  onClick={() => setViewMode('v2')}
+                  className={`px-2.5 py-1 rounded-full text-[8px] font-black transition-all ${
+                    viewMode === 'v2' 
+                      ? 'bg-zinc-100 text-black' 
+                      : 'text-zinc-500'
+                  }`}
+                >
+                  V2
+                </button>
+              </div>
             </div>
             {/* Spacer to match credit height on the right */}
             <div className="h-[10px]" />

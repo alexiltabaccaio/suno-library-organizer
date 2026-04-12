@@ -1,9 +1,86 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { ChevronRight, Pencil, Search, Filter, ChevronDown, ChevronLeft, ListFilter, Sparkles, Type, Highlighter, Palette } from 'lucide-react';
 import { SongItem } from './SongItem';
+import { SongCard } from './SongCard';
 import { Song } from '../../lib/types';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useEditor } from '../../contexts/EditorContext';
+
+const HorizontalScrollContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [children]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Mouse drag to scroll logic
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  return (
+    <div className="relative group/scroll">
+      <div 
+        ref={scrollRef}
+        onScroll={checkScroll}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+        className={`flex gap-3 overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'} ${className}`}
+      >
+        {children}
+      </div>
+      
+      {showRightArrow && (
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-zinc-900/80 border border-zinc-800/50 rounded-full text-zinc-400 hover:text-white shadow-xl opacity-0 group-hover/scroll:opacity-100 transition-opacity"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const WorkspaceArea: React.FC = () => {
   const { 
@@ -14,12 +91,37 @@ export const WorkspaceArea: React.FC = () => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [checkedSongIds, setCheckedSongIds] = useState<Set<string>>(new Set());
 
+  const songsWithTakeNumbers = useMemo(() => {
+    const groups = new Map<string, Song[]>();
+    songs.forEach(song => {
+      const key = `${song.title}|${song.styles}|${song.lyrics}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(song);
+    });
+
+    const result = new Map<string, number>();
+    groups.forEach(groupSongs => {
+      const sorted = [...groupSongs].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      sorted.forEach((s, i) => {
+        result.set(s.id, i + 1);
+      });
+    });
+    return result;
+  }, [songs]);
+
+  const sortedSongs = useMemo(() => {
+    return [...songs].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+  }, [songs]);
+
   const groupedSongs = useMemo(() => {
     const groups: { key: string; songs: Song[] }[] = [];
     const map = new Map<string, number>();
 
-    songs.forEach(song => {
-      // Group by title, styles, and lyrics
+    sortedSongs.forEach(song => {
       const key = `${song.title}|${song.styles}|${song.lyrics}`;
       if (map.has(key)) {
         groups[map.get(key)!].songs.push(song);
@@ -29,7 +131,7 @@ export const WorkspaceArea: React.FC = () => {
       }
     });
     return groups;
-  }, [songs]);
+  }, [sortedSongs]);
 
   const visibleIds = useMemo(() => {
     if (viewMode === 'before') return songs.map(s => s.id);
@@ -146,7 +248,7 @@ export const WorkspaceArea: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="space-y-1 relative pl-0">
           {viewMode === 'before' ? (
-            songs.map(song => (
+            sortedSongs.map(song => (
               <SongItem 
                 key={song.id}
                 id={song.id}
@@ -155,11 +257,16 @@ export const WorkspaceArea: React.FC = () => {
                 duration={song.duration}
                 version={song.version}
                 coverColor={song.coverColor}
+                isLiked={song.isLiked}
+                isDisliked={song.isDisliked}
+                isPinned={song.isPinned}
+                takeNumber={songsWithTakeNumbers.get(song.id)}
+                createdAt={song.createdAt}
                 isSelected={selectedItemIds.has(song.id)}
                 isChecked={checkedSongIds.has(song.id)}
                 onCheck={() => toggleCheck(song.id)}
                 onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
-                onRename={(newTitle) => handleRenameSong(song.id, newTitle)}
+                onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
               />
             ))
           ) : (
@@ -175,11 +282,15 @@ export const WorkspaceArea: React.FC = () => {
                     duration={song.duration}
                     version={song.version}
                     coverColor={song.coverColor}
+                    isLiked={song.isLiked}
+                    isDisliked={song.isDisliked}
+                    isPinned={song.isPinned}
+                    takeNumber={(song as any).takeNumber}
                     isSelected={selectedItemIds.has(song.id)}
                     isChecked={checkedSongIds.has(song.id)}
                     onCheck={() => toggleCheck(song.id)}
                     onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
-                    onRename={(newTitle) => handleRenameSong(song.id, newTitle)}
+                    onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
                   />
                 );
               }
@@ -198,13 +309,16 @@ export const WorkspaceArea: React.FC = () => {
                     duration={favoriteSong.duration}
                     version={favoriteSong.version}
                     coverColor={favoriteSong.coverColor}
+                    isLiked={favoriteSong.isLiked}
+                    isDisliked={favoriteSong.isDisliked}
+                    isPinned={favoriteSong.isPinned}
+                    takeNumber={songsWithTakeNumbers.get(favoriteSong.id)}
+                    createdAt={favoriteSong.createdAt}
                     isSelected={selectedItemIds.has(group.key)}
                     isChecked={allGroupSongsChecked}
                     onCheck={() => toggleGroupCheck(group.songs)}
                     onClick={(e) => handleSelectItem(group.key, favoriteSong.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
-                    onRename={(newTitle) => {
-                      group.songs.forEach(s => handleRenameSong(s.id, newTitle));
-                    }}
+                    onRename={(newTitle) => handleRenameSong(group.key, newTitle)}
                     isGroupHeader={true}
                     groupCount={group.songs.length}
                     isExpanded={isExpanded}
@@ -215,27 +329,58 @@ export const WorkspaceArea: React.FC = () => {
                     <div className="pl-8 relative mt-1">
                       {/* Vertical line for the stack */}
                       <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
-                      <div className="space-y-1">
-                        {group.songs.map(song => (
-                          <SongItem 
-                            key={song.id}
-                            id={song.id}
-                            title={song.title}
-                            styles={song.styles}
-                            duration={song.duration}
-                            version={song.version}
-                            coverColor={song.coverColor}
-                            isSelected={selectedItemIds.has(song.id)}
-                            isChecked={checkedSongIds.has(song.id)}
-                            onCheck={() => toggleCheck(song.id)}
-                            onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
-                            onRename={(newTitle) => handleRenameSong(song.id, newTitle)}
-                            isChild={true}
-                            isFavorite={groupFavorites[group.key] === song.id}
-                            onSetFavorite={() => handleSetFavorite(group.key, song.id)}
-                          />
-                        ))}
-                      </div>
+                      
+                      {viewMode === 'v2' ? (
+                        <HorizontalScrollContainer>
+                          {group.songs.map((song) => (
+                            <SongCard 
+                              key={song.id}
+                              id={song.id}
+                              duration={song.duration}
+                              coverColor={song.coverColor}
+                              isLiked={song.isLiked}
+                              isDisliked={song.isDisliked}
+                              isPinned={song.isPinned}
+                              takeNumber={songsWithTakeNumbers.get(song.id)}
+                              isSelected={selectedItemIds.has(song.id)}
+                              isChecked={checkedSongIds.has(song.id)}
+                              onCheck={() => toggleCheck(song.id)}
+                              onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+                              isFavorite={groupFavorites[group.key] === song.id}
+                              onSetFavorite={() => handleSetFavorite(group.key, song.id)}
+                            />
+                          ))}
+                        </HorizontalScrollContainer>
+                      ) : (
+                        <div className="space-y-1">
+                          {group.songs.map((song) => (
+                            <SongItem 
+                              key={song.id}
+                              id={song.id}
+                              title={song.title}
+                              styles={song.styles}
+                              duration={song.duration}
+                              version={song.version}
+                              coverColor={song.coverColor}
+                              notes={song.notes}
+                              isRenamed={song.isRenamed}
+                              isLiked={song.isLiked}
+                              isDisliked={song.isDisliked}
+                              isPinned={song.isPinned}
+                              takeNumber={songsWithTakeNumbers.get(song.id)}
+                              isSelected={selectedItemIds.has(song.id)}
+                              isChecked={checkedSongIds.has(song.id)}
+                              onCheck={() => toggleCheck(song.id)}
+                              onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+                              onRename={(newTitle) => handleRenameSong(song.id, newTitle)}
+                              isChild={true}
+                              createdAt={song.createdAt}
+                              isFavorite={groupFavorites[group.key] === song.id}
+                              onSetFavorite={() => handleSetFavorite(group.key, song.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -267,16 +412,28 @@ export const WorkspaceArea: React.FC = () => {
             >
               Before
             </button>
-            <button 
-              onClick={() => setViewMode('after')}
-              className={`px-6 py-1.5 rounded-full text-sm font-medium transition-all ${
-                viewMode === 'after' 
-                  ? 'bg-zinc-100 text-black shadow-lg' 
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              After
-            </button>
+            <div className="flex items-center ml-1 bg-zinc-800/30 rounded-full p-0.5">
+              <button 
+                onClick={() => setViewMode('v1')}
+                className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+                  viewMode === 'v1' 
+                    ? 'bg-zinc-100 text-black shadow-md' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                V1
+              </button>
+              <button 
+                onClick={() => setViewMode('v2')}
+                className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+                  viewMode === 'v2' 
+                    ? 'bg-zinc-100 text-black shadow-md' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                V2
+              </button>
+            </div>
           </div>
 
           <p className="text-[10px] text-zinc-600 font-medium tracking-tight">

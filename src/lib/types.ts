@@ -7,4 +7,9 @@ export interface Song {
   version: string;
   createdAt: Date;
   coverColor: string;
+  notes?: string;
+  isRenamed?: boolean;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  isPinned?: boolean;
 }

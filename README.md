@@ -1,6 +1,6 @@
 # 🎵 Suno Library Organizer: A UX Proposal for High-Volume Generation Management
 
-<img src="https://github.com/user-attachments/assets/6ed50d0f-c6c4-4d0e-bce8-a86bfe9160f2" alt="Suno Library Organizer Interface Preview" width="400">
+<img src="https://github.com/user-attachments/assets/616f8517-1625-45c5-8122-989f049e57e4" alt="Suno Library Organizer Interface Preview" width="400">
 
 👉 **[Try the Live Demo Here](https://suno-library-organizer.vercel.app/)**
 
@@ -16,7 +16,17 @@ This is a proof of concept showing how a smarter UI can declutter the workspace,
 - ⭐ **Intelligent Favorite System:** Pin your best version manually with a star, or let the app automatically highlight the latest generation as the group's cover.
 - 🔄 **Before/After Toggle:** A live comparison tool built into the demo to visualize the transition from standard chronological chaos to an organized workspace.
 - 📱 **Responsive Workspace:** A dual-engine layout designed for both deep desktop editing and quick mobile library management.
-- 🧠 **Integrated Smart Editor:** Includes the "Smart Lyrics Editor" prototype for a seamless, context-aware songwriting experience.
+- 🧠 **Integrated Smart Editor:** Includes the [Suno Smart Lyrics Editor](https://github.com/alexiltabaccaio/suno-smart-lyrics-editor) prototype for a seamless, context-aware songwriting experience.
+- 🏷️ **Smart Hybrid Title System:** Sub-cards dynamically switch between relative time (e.g., "Generated 2m ago") and user-defined notes, keeping the workspace informative yet clean.
+
+---
+
+## 🔮 Future Vision: AI-Powered Merging
+This prototype lays the groundwork for a future where the AI doesn't just generate tracks, but also understands your feedback. 
+By annotating sub-cards (using the "Smart Hybrid" note system), a future AI engine could:
+1. **Analyze User Comments**: "Great vocals on Take 2", "Better drums on Take 4".
+2. **Intelligent Merging**: Automatically combine the best elements of multiple takes into a single, definitive "Master Track" based on your specific notes.
+3. **Context-Aware Refinement**: Use your annotations as a prompt for the next generation cycle, ensuring the AI learns exactly what you're looking for.
 
 ---
 
@@ -46,6 +56,12 @@ The goal of this prototype is to show that the workspace shouldn't just be a pla
 ## 📄 Getting Started (Local Development)
 1. **Install dependencies**: `npm install`
 2. **Run development server**: `npm run dev`
+
+---
+
+## 🏷️ Tags
+
+`react` • `tailwind-css` • `suno-ai` • `lyrics-editor` • `workspace-management` • `typescript`
 
 ---
 

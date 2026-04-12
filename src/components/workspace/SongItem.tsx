@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, Layers, Star } from 'lucide-react';
 import { SongContextMenu } from './SongContextMenu';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useGlobalTimeTick } from '../../hooks/useGlobalTimeTick';
 
 interface SongItemProps {
   id: string; // Added id to props
@@ -10,6 +11,9 @@ interface SongItemProps {
   duration: string;
   version: string;
   coverColor: string;
+  notes?: string;
+  isRenamed?: boolean;
+  takeNumber?: number;
   isSelected?: boolean;
   isChecked?: boolean;
   onClick?: (e: React.MouseEvent) => void;
@@ -22,29 +26,52 @@ interface SongItemProps {
   isChild?: boolean;
   isFavorite?: boolean;
   onSetFavorite?: (e: React.MouseEvent) => void;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  isPinned?: boolean;
+  createdAt?: Date;
 }
 
+const formatRelativeTime = (date?: Date) => {
+  if (!date) return '';
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return 'less than 1 minute ago';
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) return `${diffInDays}d ago`;
+  return date.toLocaleDateString();
+};
+
 export const SongItem: React.FC<SongItemProps> = ({ 
-  id, title, styles, duration, version, coverColor, isSelected, isChecked, onClick, onCheck, onRename,
-  isGroupHeader, groupCount, isExpanded, onToggleExpand, isChild, isFavorite, onSetFavorite
+  id, title, styles, duration, version, coverColor, notes, isRenamed, takeNumber, isSelected, isChecked, onClick, onCheck, onRename,
+  isGroupHeader, groupCount, isExpanded, onToggleExpand, isChild, isFavorite, onSetFavorite,
+  isLiked, isDisliked, isPinned, createdAt
 }) => {
-  const { handleDelete, selectedItemIds, groupFavorites, songs } = useWorkspace();
+  const { handleDelete, selectedItemIds, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useWorkspace();
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(title);
+  const [editTitle, setEditTitle] = useState(notes || title);
   const [showMenu, setShowMenu] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Highly performant global clock to update relative time
+  useGlobalTimeTick(!!isChild && !isRenamed);
+
   const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
-    setEditTitle(title);
+    setEditTitle(notes || title);
   };
 
   const handleConfirmEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (editTitle.trim() && editTitle !== title) {
+    if (editTitle.trim() && editTitle !== (notes || title)) {
       onRename?.(editTitle.trim());
     }
     setIsEditing(false);
@@ -53,7 +80,7 @@ export const SongItem: React.FC<SongItemProps> = ({
   const handleCancelEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(false);
-    setEditTitle(title);
+    setEditTitle(notes || title);
   };
 
   const handleMoreClick = (e: React.MouseEvent) => {
@@ -165,15 +192,22 @@ export const SongItem: React.FC<SongItemProps> = ({
         </div>
 
         {/* Artwork */}
-        <div className={`relative ${isChild ? 'w-10 h-14' : 'w-12 h-16'} rounded-lg shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor}`}>
-          <div className={`absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm text-white font-medium rounded ${isChild ? 'text-[8px] px-1 py-0.5' : 'text-[10px] px-1.5 py-0.5'}`}>
+        <div className={`relative ${isChild ? 'w-(--song-w-child) h-(--song-h-child)' : 'w-(--song-w) h-(--song-h) ml-[1px]'} rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>
+          {/* Play Button Overlay */}
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <svg viewBox="0 0 24 24" fill="currentColor" className={`text-white drop-shadow-lg ${isChild ? "w-5 h-5 ml-0.5" : "w-7 h-7 ml-0.5"}`}>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          
+          <div className={`absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded ${isChild ? 'text-[8px] px-1 py-0.5' : 'text-[10px] px-1.5 py-0.5'}`}>
             {duration}
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 py-1">
-          <div className="flex items-center gap-2 mb-0.5">
+        <div className={`flex-1 min-w-0 ${isChild ? 'py-0.5' : 'py-1'}`}>
+          <div className={`flex items-center gap-2 ${isChild ? 'mb-0' : 'mb-0.5'}`}>
             {isEditing ? (
               <div className="flex items-center gap-1">
                 <input
@@ -186,49 +220,61 @@ export const SongItem: React.FC<SongItemProps> = ({
                     if (e.key === 'Escape') handleCancelEdit(e as any);
                   }}
                   autoFocus
-                  className="bg-[#0047ab] text-[15px] font-medium text-zinc-100 px-1 py-0.5 rounded-sm outline-none border-b border-white w-[200px]"
+                  onFocus={(e) => {
+                    e.currentTarget.select();
+                    e.currentTarget.setSelectionRange(0, e.currentTarget.value.length, 'backward');
+                  }}
+                  className={`bg-[#0047ab] font-bold text-zinc-100 px-1.5 py-1 rounded-sm outline-none border-b border-white ${isChild ? 'text-[14px] w-[200px]' : 'text-[16px] w-[250px]'}`}
+                  placeholder={isChild ? "Add a note..." : "Enter title..."}
                 />
                 <button 
                   onClick={handleConfirmEdit}
-                  className="p-1 text-zinc-100 hover:text-white transition-colors shrink-0"
+                  className="p-1.5 text-zinc-100 hover:text-white transition-colors shrink-0"
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} />
                 </button>
                 <button 
                   onClick={handleCancelEdit}
-                  className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
+                  className="p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 min-w-0">
-                <h3 className={`font-medium text-zinc-100 truncate ${isChild ? 'text-[14px]' : 'text-[15px]'}`}>{title}</h3>
-                <div className="flex items-center gap-0.5">
-                  <div className={`flex items-center transition-all duration-300 ease-out overflow-hidden ${isSelected ? 'w-5 opacity-100' : 'w-0 opacity-0 lg:group-hover:w-5 lg:group-hover:opacity-100'}`}>
+                <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : 'text-zinc-500 text-[13px]') : 'text-zinc-100 text-[16px]'}`}>
+                  {isChild ? (isRenamed ? notes : formatRelativeTime(createdAt)) : title}
+                </h3>
+                <div className="flex items-center gap-1">
+                  <div className={`flex items-center transition-all duration-300 ease-out overflow-hidden ${isSelected ? (isChild ? 'w-5' : 'w-6') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
                     <button 
                       onClick={handleStartEdit}
-                      className="p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
+                      <Pencil className={isChild ? "w-3 h-3" : "w-4 h-4"} />
                     </button>
                   </div>
                   {isChild && (
                     <div className={`flex items-center transition-all duration-300 ease-out overflow-hidden ${isFavorite || isSelected ? 'w-5 opacity-100' : 'w-0 opacity-0 lg:group-hover:w-5 lg:group-hover:opacity-100'}`}>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onSetFavorite?.(e); }}
-                        className={`p-0.5 transition-colors ${isFavorite ? 'text-yellow-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`p-1 transition-colors ${isFavorite ? 'text-yellow-500' : 'text-zinc-500 hover:text-zinc-300'}`}
                       >
                         <Star className="w-3.5 h-3.5" fill={isFavorite ? "currentColor" : "none"} />
                       </button>
                     </div>
                   )}
-                  <span className="bg-pink-500/20 text-pink-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none shrink-0 ml-0.5">
+                  <span className={`bg-pink-500/20 text-pink-400 font-black px-2 py-0.5 rounded-md leading-none shrink-0 ml-1 uppercase ${isChild ? 'text-[9px]' : 'text-[11px]'}`}>
                     {version}
                   </span>
+                  {takeNumber && (
+                    <span className={`bg-zinc-800 text-zinc-400 font-bold px-1.5 py-0.5 rounded-md leading-none shrink-0 ml-1 uppercase ${isChild ? 'text-[9px]' : 'text-[10px]'}`}>
+                      Take {takeNumber}
+                    </span>
+                  )}
                   {isGroupHeader && (
-                    <div className="flex items-center gap-1 bg-zinc-800/80 text-zinc-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none shrink-0">
-                      <Layers className="w-3 h-3" />
+                    <div className="flex items-center gap-1.5 bg-zinc-800/80 text-zinc-300 text-[11px] font-black px-2 py-0.5 rounded-md leading-none shrink-0">
+                      <Layers className="w-3.5 h-3.5" />
                       {groupCount}
                     </div>
                   )}
@@ -236,17 +282,36 @@ export const SongItem: React.FC<SongItemProps> = ({
               </div>
             )}
           </div>
-          <p className="text-[13px] text-zinc-500 truncate mb-1.5">
-            {styles}
-          </p>
           {!isChild && (
-            <div className="flex items-center gap-3">
-              <button className="text-zinc-600 hover:text-zinc-300 transition-colors"><ThumbsUp className="w-3.5 h-3.5" /></button>
-              <button className="text-zinc-600 hover:text-zinc-300 transition-colors"><ThumbsDown className="w-3.5 h-3.5" /></button>
-              <button className="text-zinc-600 hover:text-zinc-300 transition-colors"><Pin className="w-3.5 h-3.5" /></button>
-              <button className="text-zinc-600 hover:text-zinc-300 transition-colors"><Share className="w-3.5 h-3.5" /></button>
-            </div>
+            <p className="text-zinc-500 text-[14px] mb-2 truncate leading-tight">
+              {styles}
+            </p>
           )}
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleToggleLike(id); }}
+              className={`transition-colors ${isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+            >
+              <ThumbsUp className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} fill={isLiked ? "currentColor" : "none"} />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleToggleDislike(id); }}
+              className={`transition-colors ${isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+            >
+              <ThumbsDown className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} fill={isDisliked ? "currentColor" : "none"} />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleTogglePin(id); }}
+              className={`transition-colors ${isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+            >
+              <Pin className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} fill={isPinned ? "currentColor" : "none"} />
+            </button>
+            {!isChild && (
+              <button className="text-zinc-600 hover:text-zinc-300 transition-colors">
+                <Share className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* More Options */}

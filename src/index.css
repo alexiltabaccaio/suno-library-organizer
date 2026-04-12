@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+@theme {
+  --song-h: 82px;
+  --song-w: 64px;
+  --song-h-child: 70px;
+  --song-w-child: 54px;
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;

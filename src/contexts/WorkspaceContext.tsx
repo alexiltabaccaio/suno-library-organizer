@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Song } from '../lib/types';
+import { getSongGroupKey, buildGroupKey } from '../lib/songUtils';
 import { useEditor } from './EditorContext';
 import { useIsMobile } from '../hooks/useMediaQuery';
 
@@ -21,7 +22,7 @@ const INITIAL_SONGS: Song[] = [
     lyrics: "[Atmospheric Intro]\n[Pulsing Synthesizer]\nCan you feel the energy?\n(Energy)\nIt's taking over you and me\n(You and me)\n\n[Instrumental Break]\n[Hard-hitting Drums]\n(Let's go!)\nDance until the morning light\n(Jump! Jump!)\n\n[Verse]\nNeon lights are flashing bright\nEverything is feeling right\n(So right)\nLose yourself inside the sound\nFeet are lifting off the ground\n\n[Pre-Chorus]\nHere it comes again\nWe're reaching for the end\n(Hold on tight)\n\n[Chorus]\n[Heavy Bass Drop]\n(Let's go!)\nDance until the morning light\n(Jump! Jump!)",
     duration: '2:06',
     version: 'v5.5',
-    createdAt: new Date(),
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     coverColor: COVER_GRADIENTS[0],
   },
   {
@@ -31,7 +32,7 @@ const INITIAL_SONGS: Song[] = [
     lyrics: "[Atmospheric Intro]\n[Pulsing Synthesizer]\nCan you feel the energy?\n(Energy)\nIt's taking over you and me\n(You and me)\n\n[Instrumental Break]\n[Hard-hitting Drums]\n(Let's go!)\nDance until the morning light\n(Jump! Jump!)\n\n[Verse]\nNeon lights are flashing bright\nEverything is feeling right\n(So right)\nLose yourself inside the sound\nFeet are lifting off the ground\n\n[Pre-Chorus]\nHere it comes again\nWe're reaching for the end\n(Hold on tight)\n\n[Chorus]\n[Heavy Bass Drop]\n(Let's go!)\nDance until the morning light\n(Jump! Jump!)",
     duration: '2:27',
     version: 'v5.5',
-    createdAt: new Date(Date.now() - 10000),
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000 - 10000),
     coverColor: COVER_GRADIENTS[3],
   }
 ];
@@ -42,15 +43,18 @@ interface WorkspaceContextType {
   selectedItemId: string | null;
   selectedItemIds: Set<string>;
   groupFavorites: Record<string, string>;
-  viewMode: 'before' | 'after';
-  setViewMode: (val: 'before' | 'after') => void;
+  viewMode: 'before' | 'v1' | 'v2';
+  setViewMode: (val: 'before' | 'v1' | 'v2') => void;
   isMobileEditorOpen: boolean;
   setIsMobileEditorOpen: (val: boolean) => void;
   handleCreate: () => void;
   handleSelectItem: (itemId: string, songId: string, shiftKey?: boolean, ctrlKey?: boolean, visibleIds?: string[]) => void;
   handleDelete: (itemIds: string[]) => void;
-  handleRenameSong: (id: string, newTitle: string) => void;
+  handleRenameSong: (id: string, newTitle: string, isTitleRename?: boolean) => void;
   handleSetFavorite: (groupKey: string, songId: string) => void;
+  handleToggleLike: (id: string) => void;
+  handleToggleDislike: (id: string) => void;
+  handleTogglePin: (id: string) => void;
   closeDetails: () => void;
   selectedSong: Song | null;
 }
@@ -67,7 +71,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [groupFavorites, setGroupFavorites] = useState<Record<string, string>>({});
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'before' | 'after'>('after');
+  const [viewMode, setViewMode] = useState<'before' | 'v1' | 'v2'>('v1');
   const [isMobileEditorOpen, setIsMobileEditorOpen] = useState(false);
 
   const handleCreate = () => {
@@ -160,7 +164,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (itemIds.includes(song.id)) return false;
         
         // If it's a group key match (title|styles|lyrics)
-        const groupKey = `${song.title}|${song.styles}|${song.lyrics}`;
+        const groupKey = getSongGroupKey(song);
         if (itemIds.includes(groupKey)) return false;
 
         return true;
@@ -181,10 +185,49 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   };
 
-  const handleRenameSong = (id: string, newTitle: string) => {
-    setSongs(prev => prev.map(song => 
-      song.id === id ? { ...song, title: newTitle } : song
-    ));
+  const handleRenameSong = (id: string, newTitle: string, isTitleRename: boolean = false) => {
+    const isGroup = id.includes('|');
+
+    if (isGroup) {
+      const oldGroupKey = id;
+      const [, styles, lyrics] = oldGroupKey.split('|');
+      const newGroupKey = buildGroupKey(newTitle, styles, lyrics);
+
+      // Update songs titles
+      setSongs(prev => prev.map(song => {
+        if (getSongGroupKey(song) === oldGroupKey) {
+          return { ...song, title: newTitle };
+        }
+        return song;
+      }));
+
+      // Update group favorites mapping
+      setGroupFavorites(prev => {
+        if (prev[oldGroupKey]) {
+          const next = { ...prev };
+          next[newGroupKey] = next[oldGroupKey];
+          delete next[oldGroupKey];
+          return next;
+        }
+        return prev;
+      });
+    } else {
+      // Specific song rename (child card or Before mode)
+      setSongs(prev => prev.map(song => {
+        if (song.id === id) {
+          if (isTitleRename) {
+            return { ...song, title: newTitle };
+          } else {
+            return { 
+              ...song, 
+              notes: newTitle,
+              isRenamed: true 
+            };
+          }
+        }
+        return song;
+      }));
+    }
   };
 
   const handleSetFavorite = (groupKey: string, songId: string) => {
@@ -196,6 +239,57 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
         next[groupKey] = songId;
       }
       return next;
+    });
+  };
+
+  const handleToggleLike = (id: string) => {
+    setSongs(prev => {
+      // Se id è un groupKey (contiene |), dobbiamo trovare la canzone favorita o la prima
+      let targetId = id;
+      if (id.includes('|')) {
+        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+        targetId = groupFavorites[id] || groupSongs[0]?.id;
+      }
+
+      return prev.map(song => {
+        if (song.id === targetId) {
+          const isLiked = !song.isLiked;
+          return { ...song, isLiked, isDisliked: isLiked ? false : song.isDisliked };
+        }
+        return song;
+      });
+    });
+  };
+
+  const handleToggleDislike = (id: string) => {
+    setSongs(prev => {
+      let targetId = id;
+      if (id.includes('|')) {
+        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+        targetId = groupFavorites[id] || groupSongs[0]?.id;
+      }
+
+      return prev.map(song => {
+        if (song.id === targetId) {
+          const isDisliked = !song.isDisliked;
+          return { ...song, isDisliked, isLiked: isDisliked ? false : song.isLiked };
+        }
+        return song;
+      });
+    });
+  };
+
+  const handleTogglePin = (id: string) => {
+    setSongs(prev => {
+      let targetId = id;
+      if (id.includes('|')) {
+        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+        targetId = groupFavorites[id] || groupSongs[0]?.id;
+      }
+
+      return prev.map(song => 
+        song.id === targetId ? { ...song, isPinned: !song.isPinned } : song
+      );
     });
   };
 
@@ -212,7 +306,9 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     <WorkspaceContext.Provider value={{
       songs, selectedSongId, selectedItemId, selectedItemIds, groupFavorites, viewMode, setViewMode,
       isMobileEditorOpen, setIsMobileEditorOpen, handleCreate,
-      handleSelectItem, handleDelete, handleRenameSong, handleSetFavorite, closeDetails, selectedSong
+      handleSelectItem, handleDelete, handleRenameSong, handleSetFavorite,
+      handleToggleLike, handleToggleDislike, handleTogglePin,
+      closeDetails, selectedSong
     }}>
       {children}
     </WorkspaceContext.Provider>
