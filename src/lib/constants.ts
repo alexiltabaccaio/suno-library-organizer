@@ -129,3 +129,13 @@ export const SAMPLE_STYLES = [
   "Modern country, acoustic guitar, storytelling lyrics, warm female vocals, mid-tempo",
   "Dark techno, industrial sounds, heavy kick drum, hypnotic sequence, 128 bpm"
 ];
+
+export const COVER_GRADIENTS = [
+  'from-pink-500 via-purple-500 to-orange-400',
+  'from-blue-500 via-teal-500 to-green-400',
+  'from-yellow-400 via-orange-500 to-red-500',
+  'from-indigo-500 via-purple-600 to-pink-500',
+  'from-cyan-400 via-blue-500 to-indigo-600',
+  'from-emerald-400 via-teal-500 to-cyan-500',
+  'from-rose-400 via-pink-500 to-purple-600'
+];

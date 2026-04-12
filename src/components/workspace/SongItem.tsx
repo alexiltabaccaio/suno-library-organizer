@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, Layers, Star } from 'lucide-react';
 import { SongContextMenu } from './SongContextMenu';
-import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useLibrary } from '../../contexts/LibraryContext';
+import { useUI } from '../../contexts/UIContext';
 import { useGlobalTimeTick } from '../../hooks/useGlobalTimeTick';
 
 interface SongItemProps {
@@ -14,7 +15,6 @@ interface SongItemProps {
   notes?: string;
   isRenamed?: boolean;
   takeNumber?: number;
-  isSelected?: boolean;
   isChecked?: boolean;
   onClick?: (e: React.MouseEvent) => void;
   onCheck?: (e: React.MouseEvent) => void;
@@ -48,11 +48,15 @@ const formatRelativeTime = (date?: Date) => {
 };
 
 export const SongItem: React.FC<SongItemProps> = ({ 
-  id, title, styles, duration, version, coverColor, notes, isRenamed, takeNumber, isSelected, isChecked, onClick, onCheck, onRename,
+  id, title, styles, duration, version, coverColor, notes, isRenamed, takeNumber, isChecked: isCheckedProp, onClick, onCheck, onRename,
   isGroupHeader, groupCount, isExpanded, onToggleExpand, isChild, isFavorite, onSetFavorite,
   isLiked, isDisliked, isPinned, createdAt
 }) => {
-  const { handleDelete, selectedItemIds, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useWorkspace();
+  const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
+  const { selectedItemIds, checkedSongIds } = useUI();
+
+  const isSelected = selectedItemIds.has(id);
+  const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(notes || title);
   const [showMenu, setShowMenu] = useState(false);

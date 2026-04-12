@@ -5,7 +5,7 @@ import { WorkspaceArea } from '../workspace/WorkspaceArea';
 import { SongDetailsPanel } from '../workspace/SongDetailsPanel';
 import { EditorPanel } from '../editor/EditorPanel';
 import { useEditor } from '../../contexts/EditorContext';
-import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useUI } from '../../contexts/UIContext';
 
 export const MobileLayout: React.FC = () => {
   const { 
@@ -15,7 +15,7 @@ export const MobileLayout: React.FC = () => {
   const { 
     selectedSong, isMobileEditorOpen, setIsMobileEditorOpen, 
     handleCreate, closeDetails, viewMode, setViewMode
-  } = useWorkspace();
+  } = useUI();
 
   return (
     <div className="h-screen w-full bg-[#101012] text-zinc-100 flex font-sans overflow-hidden relative">

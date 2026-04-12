@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Check, Star, ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
 import { SongContextMenu } from './SongContextMenu';
-import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useLibrary } from '../../contexts/LibraryContext';
+import { useUI } from '../../contexts/UIContext';
 
 interface SongCardProps {
   id: string;
   duration: string;
   coverColor: string;
-  isSelected?: boolean;
-  isChecked?: boolean;
   onClick?: (e: React.MouseEvent) => void;
   onCheck?: (e: React.MouseEvent) => void;
   isFavorite?: boolean;
@@ -20,10 +19,14 @@ interface SongCardProps {
 }
 
 export const SongCard: React.FC<SongCardProps> = ({ 
-  id, duration, coverColor, isSelected, isChecked, onClick, onCheck,
+  id, duration, coverColor, onClick, onCheck,
   isFavorite, onSetFavorite, isLiked, isDisliked, isPinned, takeNumber
 }) => {
-  const { handleDelete, selectedItemIds, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useWorkspace();
+  const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
+  const { selectedItemIds, checkedSongIds } = useUI();
+
+  const isSelected = selectedItemIds.has(id);
+  const isChecked = checkedSongIds.has(id);
   const [showMenu, setShowMenu] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);

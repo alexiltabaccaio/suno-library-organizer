@@ -5,11 +5,11 @@ import { WorkspaceArea } from '../workspace/WorkspaceArea';
 import { SongDetailsPanel } from '../workspace/SongDetailsPanel';
 import { EditorPanel } from '../editor/EditorPanel';
 import { useEditor } from '../../contexts/EditorContext';
-import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useUI } from '../../contexts/UIContext';
 
 export const DesktopLayout: React.FC = () => {
   const { lyrics, styles, formattingMode, setFormattingMode } = useEditor();
-  const { selectedSong, handleCreate, closeDetails } = useWorkspace();
+  const { selectedSong, handleCreate, closeDetails } = useUI();
 
   return (
     <div className="h-screen w-full bg-[#101012] text-zinc-100 flex font-sans overflow-hidden">
