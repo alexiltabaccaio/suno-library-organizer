@@ -34,14 +34,14 @@ export const LyricsEditor: React.FC<LyricsEditorProps> = ({
     <div className="bg-[#19191b] rounded-xl p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-medium text-[15px] text-zinc-100 cursor-default">
+          <div className="flex items-center gap-2 font-medium text-[15px] text-zinc-500 cursor-default">
             <ChevronDown className="w-4 h-4" />
             Lyrics
           </div>
           <div className="relative flex items-center gap-1">
             <button 
               onClick={() => setShowInfo(!showInfo)}
-              className={`p-1 rounded-md ${showInfo ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`p-1 rounded-md ${showInfo ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-600 hover:text-zinc-400'}`}
               title="Legend"
             >
               <Info className="w-4 h-4" />

@@ -49,8 +49,8 @@ export const StylesEditor: React.FC<StylesEditorProps> = ({ styles, setStyles })
   return (
     <div className="bg-[#19191b] rounded-xl p-4 flex flex-col gap-3 relative">
       <div className="flex items-center justify-between">
-        <button className="flex items-center gap-2 font-medium text-[15px] cursor-default">
-          <ChevronDown className="w-4 h-4 text-zinc-100" />
+        <button className="flex items-center gap-2 font-medium text-[15px] text-zinc-500 cursor-default">
+          <ChevronDown className="w-4 h-4" />
           Styles
         </button>
         <div className="flex items-center gap-2">

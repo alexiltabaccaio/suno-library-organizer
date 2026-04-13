@@ -65,4 +65,9 @@ The goal of this prototype is to show that the workspace shouldn't just be a pla
 
 ---
 
+## 📄 License
+Distributed under the MIT License. See LICENSE for more information.
+
+---
+
 *Prototype developed by [Alex Giustizieri](https://www.linkedin.com/in/alexgiustizieri/)*

@@ -11,9 +11,9 @@ export const TopBar: React.FC = () => {
       </button>
 
       <div className="flex bg-zinc-900/80 border border-zinc-800/80 rounded-full p-0.5">
-        <button className="px-3 py-1 text-sm font-medium rounded-full text-zinc-400 cursor-default">Simple</button>
+        <button className="px-3 py-1 text-sm font-medium rounded-full text-zinc-600 cursor-default">Simple</button>
         <button className="px-3 py-1 text-sm font-medium rounded-full bg-zinc-800 text-zinc-100 shadow-sm cursor-default">Advanced</button>
-        <button className="px-3 py-1 text-sm font-medium rounded-full text-zinc-400 cursor-default">Sounds</button>
+        <button className="px-3 py-1 text-sm font-medium rounded-full text-zinc-600 cursor-default">Sounds</button>
       </div>
 
       <VersionSelector />
