@@ -17,13 +17,13 @@ export const SongMetadata: React.FC<SongMetadataProps> = ({ title, setTitle }) =
 
       {/* Song Title */}
       <div className="flex items-center gap-3 bg-[#19191b] rounded-xl p-4">
-        <Music className="w-4 h-4 text-zinc-600" />
+        <Music className="w-4 h-4 text-zinc-100" />
         <input 
           type="text" 
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Song Title (Optional)" 
-          className="bg-transparent outline-none text-[15px] placeholder:text-zinc-500 w-full"
+          className="bg-transparent outline-none text-[15px] text-zinc-100 placeholder:text-zinc-600 w-full"
         />
       </div>
 

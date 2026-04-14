@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, Layers, Star } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, ChevronLeft, Layers, Star, Filter, EyeOff } from 'lucide-react';
 import { SongContextMenu } from '../../../widgets/workspace/ui/SongContextMenu';
 import { useLibrary } from '../../../features/library/model/LibraryContext';
 import { useUI } from '../../../features/ui/model/UIContext';
@@ -30,6 +30,9 @@ interface SongItemProps {
   isDisliked?: boolean;
   isPinned?: boolean;
   createdAt?: Date;
+  subPage?: number;
+  totalSubPages?: number;
+  onSubPageChange?: (page: number) => void;
 }
 
 const formatRelativeTime = (date?: Date) => {
@@ -50,19 +53,33 @@ const formatRelativeTime = (date?: Date) => {
 export const SongItem: React.FC<SongItemProps> = ({ 
   id, title, styles, duration, version, coverColor, notes, isRenamed, takeNumber, isChecked: isCheckedProp, onClick, onCheck, onRename,
   isGroupHeader, groupCount, isExpanded, onToggleExpand, isChild, isFavorite, onSetFavorite,
-  isLiked, isDisliked, isPinned, createdAt
+  isLiked, isDisliked, isPinned, createdAt,
+  subPage = 1, totalSubPages = 1, onSubPageChange
 }) => {
   const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { selectedItemIds, checkedSongIds } = useUI();
+  const { selectedItemIds, checkedSongIds, subFilters, toggleSubFilter } = useUI();
 
   const isSelected = selectedItemIds.has(id);
   const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(notes || title);
   const [showMenu, setShowMenu] = useState(false);
+  const [showSubFilters, setShowSubFilters] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const subFilterRef = useRef<HTMLDivElement>(null);
+
+  // Close sub-filters when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (subFilterRef.current && !subFilterRef.current.contains(event.target as Node)) {
+        setShowSubFilters(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Highly performant global clock to update relative time
   useGlobalTimeTick(!!isChild && !isRenamed);
@@ -118,7 +135,7 @@ export const SongItem: React.FC<SongItemProps> = ({
   };
 
   const onDeleteExcludeFavorite = () => {
-    if (selectedItemIds.has(id)) {
+    if (selectedItemIds.has(id) && selectedItemIds.size > 1) {
       // Find which IDs in the selection are favorites
       const favoriteIds = new Set(Object.values(groupFavorites));
       const idsToDelete = (Array.from(selectedItemIds) as string[]).filter(itemId => {
@@ -148,11 +165,25 @@ export const SongItem: React.FC<SongItemProps> = ({
       });
 
       handleDelete(finalIdsToDelete);
+    } else {
+      // Single item action (either selected or just clicked via menu)
+      if (isGroupHeader) {
+        const groupKey = id;
+        const groupSongs = songs.filter(s => `${s.title}|${s.styles}|${s.lyrics}` === groupKey);
+        const favId = groupFavorites[groupKey] || groupSongs[0]?.id;
+        const finalIdsToDelete = groupSongs.filter(s => s.id !== favId).map(s => s.id);
+        handleDelete(finalIdsToDelete);
+      }
     }
   };
 
   // Check if selection includes at least one explicit favorite and has other items to delete
   const canExcludeFavorite = () => {
+    // If this specific item is a group header and has a favorite, we can always show it
+    if (isGroupHeader && !!groupFavorites[id]) {
+      return true;
+    }
+
     if (!selectedItemIds.has(id)) return false;
     const selection = Array.from(selectedItemIds) as string[];
     const favoriteIds = new Set(Object.values(groupFavorites));
@@ -162,9 +193,7 @@ export const SongItem: React.FC<SongItemProps> = ({
       return selection.some(itemId => favoriteIds.has(itemId) || (itemId.includes('|') && !!groupFavorites[itemId]));
     }
     
-    // If only one item is selected, only show if it's a group header with an explicit favorite
-    const singleId = selection[0];
-    return singleId.includes('|') && !!groupFavorites[singleId];
+    return false;
   };
 
   return (
@@ -204,7 +233,7 @@ export const SongItem: React.FC<SongItemProps> = ({
             className={`w-3 h-3 rounded-[2px] border transition-all flex items-center justify-center ${
             isChecked 
               ? 'opacity-100 bg-zinc-100 border-zinc-100' 
-              : 'opacity-0 group-hover:opacity-100 border-zinc-700 bg-transparent'
+              : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
           }`}>
             {isChecked && <Check className="w-2 h-2 text-black stroke-[5]" />}
           </div>
@@ -262,7 +291,7 @@ export const SongItem: React.FC<SongItemProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 min-w-0">
-                  <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : 'text-zinc-600 text-[13px] opacity-0 group-hover:opacity-100 transition-opacity') : 'text-zinc-100 text-[16px]'}`}>
+                  <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : `text-zinc-600 text-[13px] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`) : 'text-zinc-100 text-[16px]'}`}>
                     {isChild ? (isRenamed ? notes : 'Add a note...') : title}
                   </h3>
                   <div className="flex items-center gap-1">
@@ -285,10 +314,100 @@ export const SongItem: React.FC<SongItemProps> = ({
                           </span>
                         )}
                         {isGroupHeader && (
-                          <div className="flex items-center gap-1.5 bg-zinc-800/80 text-zinc-300 text-[11px] font-black px-2 py-0.5 rounded-md leading-none shrink-0">
-                            <Layers className="w-3.5 h-3.5" />
-                            {groupCount}
-                          </div>
+                          <>
+                            <div className="flex items-center gap-1.5 bg-zinc-800/80 text-zinc-300 text-[11px] font-black px-2 py-0.5 rounded-md leading-none shrink-0">
+                              <Layers className="w-3.5 h-3.5" />
+                              {groupCount}
+                            </div>
+                            
+                            {/* Sub-pagination */}
+                            <div className="flex items-center gap-0.5 bg-zinc-800/80 rounded-md px-1 py-0.5 shrink-0 ml-1">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (subPage > 1) onSubPageChange?.(subPage - 1);
+                                }}
+                                disabled={subPage === 1}
+                                className={`p-0.5 transition-colors ${subPage === 1 ? 'text-zinc-700' : 'text-zinc-400 hover:text-zinc-200'}`}
+                              >
+                                <ChevronLeft className="w-3 h-3" />
+                              </button>
+                              <span className="text-zinc-300 text-[10px] font-bold min-w-[10px] text-center">
+                                {subPage}
+                              </span>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (subPage < totalSubPages) onSubPageChange?.(groupCount > 0 ? subPage + 1 : subPage);
+                                }}
+                                disabled={subPage === totalSubPages}
+                                className={`p-0.5 transition-colors ${subPage === totalSubPages ? 'text-zinc-700' : 'text-zinc-400 hover:text-zinc-200'}`}
+                              >
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            </div>
+                            
+                            {/* Sub-card Filters */}
+                            <div className="relative ml-1" ref={subFilterRef}>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowSubFilters(!showSubFilters);
+                                }}
+                                className={`p-1 rounded-md transition-colors ${showSubFilters ? 'bg-zinc-100 text-black' : 'bg-zinc-800/80 text-zinc-400 hover:text-zinc-200'}`}
+                              >
+                                <Filter className="w-3 h-3" />
+                              </button>
+
+                              {showSubFilters && (
+                                <div 
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute top-full left-0 mt-2 w-48 bg-[#19191b] border border-zinc-800 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+                                >
+                                  <button 
+                                    onClick={() => toggleSubFilter('liked')}
+                                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <ThumbsUp className={`w-3.5 h-3.5 ${subFilters.liked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                                      <span className={`text-[12px] ${subFilters.liked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Liked</span>
+                                    </div>
+                                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${subFilters.liked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                                      {subFilters.liked && <Check className="w-2.5 h-2.5 text-black stroke-[4]" />}
+                                    </div>
+                                  </button>
+
+                                  <button 
+                                    onClick={() => toggleSubFilter('disliked')}
+                                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <ThumbsDown className={`w-3.5 h-3.5 ${subFilters.disliked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                                      <span className={`text-[12px] ${subFilters.disliked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Disliked</span>
+                                    </div>
+                                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${subFilters.disliked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                                      {subFilters.disliked && <Check className="w-2.5 h-2.5 text-black stroke-[4]" />}
+                                    </div>
+                                  </button>
+
+                                  <div className="h-[1px] bg-zinc-800 my-1 mx-2" />
+
+                                  <button 
+                                    onClick={() => toggleSubFilter('hideDisliked')}
+                                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <EyeOff className={`w-3.5 h-3.5 ${subFilters.hideDisliked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                                      <span className={`text-[12px] ${subFilters.hideDisliked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Hide Disliked</span>
+                                    </div>
+                                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${subFilters.hideDisliked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                                      {subFilters.hideDisliked && <Check className="w-2.5 h-2.5 text-black stroke-[4]" />}
+                                    </div>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </>
                         )}
                       </>
                     )}

@@ -14,6 +14,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ isMobile }) => {
   const { 
     lyrics, setLyrics, lyricsRef, 
     isLyricsExpanded, setIsLyricsExpanded,
+    isLyricsCollapsed, setIsLyricsCollapsed,
+    isStylesCollapsed, setIsStylesCollapsed,
     formattingMode, setFormattingMode,
     showInfo, setShowInfo,
     styles, setStyles,
@@ -33,6 +35,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ isMobile }) => {
         lyricsRef={lyricsRef}
         isExpanded={isLyricsExpanded}
         setIsExpanded={setIsLyricsExpanded}
+        isCollapsed={isLyricsCollapsed}
+        setIsCollapsed={setIsLyricsCollapsed}
         formattingMode={formattingMode}
         setFormattingMode={setFormattingMode}
         showInfo={showInfo}
@@ -41,7 +45,12 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ isMobile }) => {
         onSmartInsert={handleSmartInsert}
       />
 
-      <StylesEditor styles={styles} setStyles={setStyles} />
+      <StylesEditor 
+        styles={styles} 
+        setStyles={setStyles} 
+        isCollapsed={isStylesCollapsed}
+        setIsCollapsed={setIsStylesCollapsed}
+      />
 
       <SongMetadata title={title} setTitle={setTitle} />
     </div>

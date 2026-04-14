@@ -117,7 +117,7 @@ export const FormattedTextarea = forwardRef<FormattedTextareaRef, FormattedTexta
       // Show plus on the tag line, OR on the hovered line if no tags exist yet AND it's not a "ghost" empty line
       // (We allow it on the first line, or if the line has content, or if it's the current cursor line)
       // Special case: if the document is empty, always show on the first line
-      const showPlus = !readOnly && (
+      const showPlus = !readOnly && !!onSmartInsert && (
         isTagLine || 
         (isDocEmpty && lineIdx === 0) ||
         (activeTagLineIdx === -1 && isHoveredLine && (lineIdx === 0 || !isLineEmpty || lineIdx === activeLineIndex))

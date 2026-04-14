@@ -11,6 +11,10 @@ interface EditorContextType {
   setTitle: (val: string) => void;
   isLyricsExpanded: boolean;
   setIsLyricsExpanded: (val: boolean) => void;
+  isLyricsCollapsed: boolean;
+  setIsLyricsCollapsed: (val: boolean) => void;
+  isStylesCollapsed: boolean;
+  setIsStylesCollapsed: (val: boolean) => void;
   formattingMode: 'none' | 'simple' | 'colored';
   setFormattingMode: (val: 'none' | 'simple' | 'colored') => void;
   version: string;
@@ -28,6 +32,8 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [styles, setStyles] = useState('');
   const [title, setTitle] = useState('');
   const [isLyricsExpanded, setIsLyricsExpanded] = useState(false);
+  const [isLyricsCollapsed, setIsLyricsCollapsed] = useState(false);
+  const [isStylesCollapsed, setIsStylesCollapsed] = useState(false);
   const [formattingMode, setFormattingMode] = useState<'none' | 'simple' | 'colored'>('none');
   const [version, setVersion] = useState('v5.5');
   const [showInfo, setShowInfo] = useState(false);
@@ -51,7 +57,10 @@ export const EditorProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   return (
     <EditorContext.Provider value={{
       lyrics, setLyrics, styles, setStyles, title, setTitle,
-      isLyricsExpanded, setIsLyricsExpanded, formattingMode, setFormattingMode,
+      isLyricsExpanded, setIsLyricsExpanded, 
+      isLyricsCollapsed, setIsLyricsCollapsed,
+      isStylesCollapsed, setIsStylesCollapsed,
+      formattingMode, setFormattingMode,
       version, setVersion,
       showInfo, setShowInfo, lyricsRef, handleGenerateSong
     }}>

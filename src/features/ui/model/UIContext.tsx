@@ -20,6 +20,20 @@ interface UIContextType {
   toggleGroupCheck: (songsInGroup: Song[]) => void;
   closeDetails: () => void;
   selectedSong: Song | null;
+  filters: Filters;
+  subFilters: Filters;
+  setFilters: (filters: Filters) => void;
+  setSubFilters: (filters: Filters) => void;
+  toggleFilter: (key: keyof Filters) => void;
+  toggleSubFilter: (key: keyof Filters) => void;
+  groupPages: Record<string, number>;
+  setGroupPage: (groupKey: string, page: number) => void;
+}
+
+export interface Filters {
+  liked: boolean;
+  disliked: boolean;
+  hideDisliked: boolean;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
@@ -36,6 +50,17 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'before' | 'v1' | 'v2'>('v1');
   const [isMobileEditorOpen, setIsMobileEditorOpen] = useState(false);
+  const [filters, setFilters] = useState<Filters>({
+    liked: false,
+    disliked: false,
+    hideDisliked: true
+  });
+  const [subFilters, setSubFilters] = useState<Filters>({
+    liked: false,
+    disliked: false,
+    hideDisliked: true
+  });
+  const [groupPages, setGroupPages] = useState<Record<string, number>>({});
 
   // Handle group key changes to preserve selection state
   React.useEffect(() => {
@@ -186,11 +211,35 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const selectedSong = useMemo(() => songs.find(s => s.id === selectedSongId) || null, [songs, selectedSongId]);
 
+  const toggleFilter = (key: keyof Filters) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const toggleSubFilter = (key: keyof Filters) => {
+    setSubFilters(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const setGroupPage = (groupKey: string, page: number) => {
+    setGroupPages(prev => ({
+      ...prev,
+      [groupKey]: page
+    }));
+  };
+
   return (
     <UIContext.Provider value={{
       selectedSongId, selectedItemId, selectedItemIds, checkedSongIds, viewMode, setViewMode,
       isMobileEditorOpen, setIsMobileEditorOpen, handleCreate, handleSelectItem,
-      toggleCheck, toggleGroupCheck, closeDetails, selectedSong
+      toggleCheck, toggleGroupCheck, closeDetails, selectedSong,
+      filters, setFilters, toggleFilter,
+      subFilters, setSubFilters, toggleSubFilter,
+      groupPages, setGroupPage
     }}>
       {children}
     </UIContext.Provider>

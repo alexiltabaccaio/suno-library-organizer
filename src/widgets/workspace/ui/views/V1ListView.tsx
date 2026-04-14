@@ -2,6 +2,7 @@ import React from 'react';
 import { SongItem } from '../../../../entities/song/ui/SongItem';
 import { Song } from '../../../../entities/song/model/types';
 import { SongGroup } from '../../../../features/library/hooks/useSongGrouping';
+import { useUI } from '../../../../features/ui/model/UIContext';
 
 interface V1ListViewProps {
   groupedSongs: SongGroup[];
@@ -32,6 +33,9 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
   handleSetFavorite,
   toggleGroup
 }) => {
+  const { subFilters, groupPages, setGroupPage } = useUI();
+  const SUB_ITEMS_PER_PAGE = 15;
+
   return (
     <>
       {groupedSongs.map(group => {
@@ -62,6 +66,18 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
         const favoriteSong = group.songs.find(s => s.id === favoriteId) || group.songs[0];
         const allGroupSongsChecked = group.songs.every(s => checkedSongIds.has(s.id));
 
+        const filteredSubSongs = group.songs.filter(s => {
+          if (subFilters.liked && !s.isLiked) return false;
+          if (subFilters.disliked && !s.isDisliked) return false;
+          if (subFilters.hideDisliked && s.isDisliked) return false;
+          return true;
+        });
+
+        const totalSubPages = Math.ceil(filteredSubSongs.length / SUB_ITEMS_PER_PAGE);
+        const subPage = Math.min(groupPages[group.key] || 1, totalSubPages || 1);
+        const start = (subPage - 1) * SUB_ITEMS_PER_PAGE;
+        const paginatedSubSongs = filteredSubSongs.slice(start, start + SUB_ITEMS_PER_PAGE);
+
         return (
           <div key={group.key} className="space-y-1">
             <SongItem 
@@ -84,13 +100,16 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               groupCount={group.songs.length}
               isExpanded={isExpanded}
               onToggleExpand={(e) => toggleGroup(e, group.key)}
+              subPage={subPage}
+              totalSubPages={totalSubPages}
+              onSubPageChange={(page) => setGroupPage(group.key, page)}
             />
             
             {isExpanded && (
               <div className="pl-8 relative mt-1">
                 <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
                 <div className="space-y-1">
-                  {group.songs.map((song) => (
+                  {paginatedSubSongs.map((song) => (
                     <SongItem 
                       key={song.id}
                       id={song.id}

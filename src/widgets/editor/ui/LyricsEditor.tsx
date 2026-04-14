@@ -9,6 +9,8 @@ interface LyricsEditorProps {
   lyricsRef: React.RefObject<FormattedTextareaRef>;
   isExpanded: boolean;
   setIsExpanded: (val: boolean) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (val: boolean) => void;
   formattingMode: 'none' | 'simple' | 'colored';
   setFormattingMode: (val: 'none' | 'simple' | 'colored') => void;
   showInfo: boolean;
@@ -23,6 +25,8 @@ export const LyricsEditor: React.FC<LyricsEditorProps> = ({
   lyricsRef,
   isExpanded,
   setIsExpanded,
+  isCollapsed,
+  setIsCollapsed,
   formattingMode,
   setFormattingMode,
   showInfo,
@@ -31,75 +35,84 @@ export const LyricsEditor: React.FC<LyricsEditorProps> = ({
   onSmartInsert
 }) => {
   return (
-    <div className="bg-[#19191b] rounded-xl p-4 flex flex-col gap-3">
+    <div className={`bg-[#19191b] rounded-xl p-4 flex flex-col transition-all duration-200 ${isCollapsed ? 'gap-0' : 'gap-3'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-medium text-[15px] text-zinc-500 cursor-default">
-            <ChevronDown className="w-4 h-4" />
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex items-center gap-2 font-medium text-[15px] text-zinc-100 hover:text-white transition-colors"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
             Lyrics
-          </div>
-          <div className="relative flex items-center gap-1">
-            <button 
-              onClick={() => setShowInfo(!showInfo)}
-              className={`p-1 rounded-md ${showInfo ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-600 hover:text-zinc-400'}`}
-              title="Legend"
-            >
-              <Info className="w-4 h-4" />
-            </button>
+          </button>
+          {!isCollapsed && (
+            <div className="relative flex items-center gap-1">
+              <button 
+                onClick={() => setShowInfo(!showInfo)}
+                className={`p-1 rounded-md transition-colors ${showInfo ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-100'}`}
+                title="Legend"
+              >
+                <Info className="w-4 h-4" />
+              </button>
 
-            {showInfo && (
-              <EditorGuide 
-                formattingMode={formattingMode}
-                onClose={() => setShowInfo(false)}
-              />
-            )}
+              {showInfo && (
+                <EditorGuide 
+                  formattingMode={formattingMode}
+                  onClose={() => setShowInfo(false)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+        {!isCollapsed && (
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setLyrics('')}
+              disabled={lyrics.length === 0}
+              className={`p-2 rounded-full ${
+                lyrics.length > 0 
+                  ? 'bg-zinc-800/80 text-zinc-400 hover:bg-red-500/20 hover:text-red-400' 
+                  : 'bg-zinc-800/40 text-zinc-600 cursor-default'
+              }`}
+              title="Clear lyrics"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={onGenerateSong}
+              className="p-2 bg-zinc-800/80 rounded-full hover:bg-zinc-700 cursor-pointer"
+              title="Generate random song"
+            >
+              <Wand2 className="w-4 h-4 text-zinc-300" />
+            </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setLyrics('')}
-            disabled={lyrics.length === 0}
-            className={`p-2 rounded-full ${
-              lyrics.length > 0 
-                ? 'bg-zinc-800/80 text-zinc-400 hover:bg-red-500/20 hover:text-red-400' 
-                : 'bg-zinc-800/40 text-zinc-600 cursor-default'
-            }`}
-            title="Clear lyrics"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={onGenerateSong}
-            className="p-2 bg-zinc-800/80 rounded-full hover:bg-zinc-700 cursor-pointer"
-            title="Generate random song"
-          >
-            <Wand2 className="w-4 h-4 text-zinc-300" />
-          </button>
-        </div>
+        )}
       </div>
       
-      <div className="relative flex flex-col" style={{ minHeight: isExpanded ? '400px' : '140px' }}>
-        <FormattedTextarea 
-          ref={lyricsRef}
-          value={lyrics}
-          onChange={setLyrics}
-          onSmartInsert={onSmartInsert}
-          formattingMode={formattingMode}
-          placeholder="Write some lyrics or a prompt or leave blank for instrumental"
-          minHeight={isExpanded ? "400px" : "140px"}
-        />
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <button className="text-zinc-500 cursor-default shrink-0">
-            <Library className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={`p-2 rounded-full hover:bg-zinc-700 ${isExpanded ? 'bg-zinc-700' : 'bg-zinc-800/80'}`}
-          >
-            <Maximize2 className="w-4 h-4 text-zinc-300" />
-          </button>
+      {!isCollapsed && (
+        <div className="relative flex flex-col" style={{ minHeight: isExpanded ? '400px' : '140px' }}>
+          <FormattedTextarea 
+            ref={lyricsRef}
+            value={lyrics}
+            onChange={setLyrics}
+            onSmartInsert={onSmartInsert}
+            formattingMode={formattingMode}
+            placeholder="Write some lyrics or a prompt or leave blank for instrumental"
+            minHeight={isExpanded ? "400px" : "140px"}
+          />
+          <div className="flex items-center justify-between mt-auto pt-2">
+            <button className="text-zinc-500 cursor-default shrink-0">
+              <Library className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`p-2 rounded-full hover:bg-zinc-700 ${isExpanded ? 'bg-zinc-700' : 'bg-zinc-800/80'}`}
+            >
+              <Maximize2 className="w-4 h-4 text-zinc-300" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { ChevronRight, Pencil, Search, Filter, ChevronDown, ChevronLeft, ListFilter, Sparkles, Type, Highlighter, Palette } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { ChevronRight, Pencil, Search, Filter, ChevronDown, ChevronLeft, ListFilter, Sparkles, Type, Highlighter, Palette, ThumbsUp, ThumbsDown, EyeOff, Check } from 'lucide-react';
 import { useLibrary } from '../../../features/library/model/LibraryContext';
 import { useUI } from '../../../features/ui/model/UIContext';
 import { useEditor } from '../../../features/editor/model/EditorContext';
@@ -18,11 +18,27 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
     songs, handleRenameSong, handleSetFavorite, groupFavorites
   } = useLibrary();
   const {
-    selectedItemIds, checkedSongIds, handleSelectItem, toggleCheck, toggleGroupCheck, viewMode, setViewMode 
+    selectedItemIds, checkedSongIds, handleSelectItem, toggleCheck, toggleGroupCheck, viewMode, setViewMode,
+    filters, toggleFilter, subFilters, toggleSubFilter
   } = useUI();
   const { formattingMode, setFormattingMode } = useEditor();
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 12;
+
+  // Close filters when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setShowFilters(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Handle group key changes to preserve expanded state
   React.useEffect(() => {
@@ -43,24 +59,94 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
     return () => window.removeEventListener('groupRenamed', handleGroupRenamed);
   }, []);
 
+  // Reset page when view mode changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [viewMode]);
+
   const { sortedSongs, groupedSongs, songsWithTakeNumbers } = useSongGrouping(songs);
 
+  // Filter logic
+  const filteredGroupedSongs = useMemo(() => {
+    return groupedSongs.filter(group => {
+      const favoriteId = groupFavorites[group.key] || group.songs[0].id;
+      const favoriteSong = group.songs.find(s => s.id === favoriteId) || group.songs[0];
+
+      // Check if favorite song matches main filters
+      const matchesMain = (
+        (!filters.liked || favoriteSong.isLiked) &&
+        (!filters.disliked || favoriteSong.isDisliked) &&
+        (!filters.hideDisliked || !favoriteSong.isDisliked)
+      );
+
+      if (matchesMain) return true;
+
+      // Check if any song in the group matches sub-filters
+      // This ensures the group header stays visible if we want to see its sub-content
+      const matchesSub = group.songs.some(s => {
+        return (
+          (!subFilters.liked || s.isLiked) &&
+          (!subFilters.disliked || s.isDisliked) &&
+          (!subFilters.hideDisliked || !s.isDisliked)
+        );
+      });
+
+      return matchesSub;
+    });
+  }, [groupedSongs, filters, subFilters, groupFavorites]);
+
+  const filteredSortedSongs = useMemo(() => {
+    return sortedSongs.filter(song => {
+      if (filters.liked && !song.isLiked) return false;
+      if (filters.disliked && !song.isDisliked) return false;
+      if (filters.hideDisliked && song.isDisliked) return false;
+      return true;
+    });
+  }, [sortedSongs, filters]);
+
+  // Pagination logic
+  const paginatedData = useMemo(() => {
+    if (viewMode === 'before') {
+      const totalPages = Math.ceil(filteredSortedSongs.length / ITEMS_PER_PAGE);
+      const start = (currentPage - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE;
+      return {
+        items: filteredSortedSongs.slice(start, end),
+        totalPages: Math.max(1, totalPages)
+      };
+    } else {
+      const totalPages = Math.ceil(filteredGroupedSongs.length / ITEMS_PER_PAGE);
+      const start = (currentPage - 1) * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE;
+      return {
+        items: filteredGroupedSongs.slice(start, end),
+        totalPages: Math.max(1, totalPages)
+      };
+    }
+  }, [viewMode, filteredSortedSongs, filteredGroupedSongs, currentPage]);
+
   const visibleIds = useMemo(() => {
-    if (viewMode === 'before') return songs.map(s => s.id);
+    if (viewMode === 'before') return (paginatedData.items as Song[]).map(s => s.id);
     
     const ids: string[] = [];
-    groupedSongs.forEach(group => {
+    (paginatedData.items as any[]).forEach(group => {
       if (group.songs.length === 1) {
         ids.push(group.songs[0].id);
       } else {
         ids.push(group.key);
         if (expandedGroups.has(group.key)) {
-          group.songs.forEach(s => ids.push(s.id));
+          const filteredSubSongs = group.songs.filter((s: Song) => {
+            if (subFilters.liked && !s.isLiked) return false;
+            if (subFilters.disliked && !s.isDisliked) return false;
+            if (subFilters.hideDisliked && s.isDisliked) return false;
+            return true;
+          });
+          filteredSubSongs.forEach((s: Song) => ids.push(s.id));
         }
       }
     });
     return ids;
-  }, [viewMode, songs, groupedSongs, expandedGroups]);
+  }, [viewMode, paginatedData.items, expandedGroups, subFilters]);
 
   const toggleGroup = (e: React.MouseEvent, key: string) => {
     e.stopPropagation();
@@ -105,11 +191,62 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
 
         <div className="flex items-center gap-2 text-sm flex-1 md:flex-none justify-between md:justify-end">
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full text-zinc-300">
-              <Filter className="w-4 h-4 md:w-3.5 md:h-3.5" />
-              <span className="hidden md:inline">Filters (3)</span>
-              <ChevronDown className="w-3.5 h-3.5 ml-0.5 text-zinc-500" />
-            </button>
+            <div className="relative" ref={filterRef}>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full ${showFilters ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-300'}`}
+              >
+                <Filter className="w-4 h-4 md:w-3.5 md:h-3.5" />
+                <span className="hidden md:inline">Filters ({Object.values(filters).filter(Boolean).length})</span>
+                <ChevronDown className={`w-3.5 h-3.5 ml-0.5 text-zinc-500 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showFilters && (
+                <div className="absolute top-full right-0 mt-2 w-52 bg-[#19191b] border border-zinc-800 rounded-xl shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                  <button 
+                    onClick={() => toggleFilter('liked')}
+                    className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ThumbsUp className={`w-4 h-4 ${filters.liked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                      <span className={`text-sm ${filters.liked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Liked</span>
+                    </div>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${filters.liked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                      {filters.liked && <Check className="w-3 h-3 text-black stroke-[4]" />}
+                    </div>
+                  </button>
+
+                  <button 
+                    onClick={() => toggleFilter('disliked')}
+                    className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ThumbsDown className={`w-4 h-4 ${filters.disliked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                      <span className={`text-sm ${filters.disliked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Disliked</span>
+                    </div>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${filters.disliked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                      {filters.disliked && <Check className="w-3 h-3 text-black stroke-[4]" />}
+                    </div>
+                  </button>
+
+                  <div className="h-[1px] bg-zinc-800 my-1 mx-2" />
+
+                  <button 
+                    onClick={() => toggleFilter('hideDisliked')}
+                    className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <EyeOff className={`w-4 h-4 ${filters.hideDisliked ? 'text-zinc-100' : 'text-zinc-500'}`} />
+                      <span className={`text-sm ${filters.hideDisliked ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>Hide Disliked</span>
+                    </div>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${filters.hideDisliked ? 'bg-zinc-100 border-zinc-100' : 'border-zinc-700'}`}>
+                      {filters.hideDisliked && <Check className="w-3 h-3 text-black stroke-[4]" />}
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button className="flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full text-zinc-300">
               <ListFilter className="w-4 h-4 md:w-3.5 md:h-3.5" />
               <span className="hidden md:inline">Newest</span>
@@ -124,9 +261,23 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
           </div>
 
           <div className="flex items-center gap-1 bg-[#19191b] rounded-full px-2 h-10">
-            <button className="p-1 text-zinc-500 hover:text-zinc-300"><ChevronLeft className="w-4 h-4" /></button>
-            <span className="text-zinc-300 text-xs font-medium px-1">1</span>
-            <button className="p-1 text-zinc-500 hover:text-zinc-300"><ChevronRight className="w-4 h-4" /></button>
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`p-1 transition-colors ${currentPage === 1 ? 'text-zinc-700 cursor-not-allowed' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-zinc-300 text-xs font-medium px-1 min-w-[20px] text-center">
+              {currentPage}
+            </span>
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(paginatedData.totalPages, prev + 1))}
+              disabled={currentPage === paginatedData.totalPages}
+              className={`p-1 transition-colors ${currentPage === paginatedData.totalPages ? 'text-zinc-700 cursor-not-allowed' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -136,7 +287,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
         <div className="space-y-1 relative pl-0">
           {viewMode === 'before' ? (
             <BeforeView 
-              songs={sortedSongs}
+              songs={paginatedData.items as Song[]}
               songsWithTakeNumbers={songsWithTakeNumbers}
               visibleIds={visibleIds}
               toggleCheck={toggleCheck}
@@ -145,7 +296,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
             />
           ) : viewMode === 'v1' ? (
             <V1ListView 
-              groupedSongs={groupedSongs}
+              groupedSongs={paginatedData.items as any[]}
               songsWithTakeNumbers={songsWithTakeNumbers}
               checkedSongIds={checkedSongIds}
               visibleIds={visibleIds}
@@ -160,7 +311,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
             />
           ) : (
             <V2GridView 
-              groupedSongs={groupedSongs}
+              groupedSongs={paginatedData.items as any[]}
               songsWithTakeNumbers={songsWithTakeNumbers}
               checkedSongIds={checkedSongIds}
               visibleIds={visibleIds}

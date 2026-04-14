@@ -65,7 +65,7 @@ export const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps>
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
-        className={`flex gap-3 overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'} ${className}`}
+        className={`flex overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'} ${className}`}
       >
         {children}
       </div>

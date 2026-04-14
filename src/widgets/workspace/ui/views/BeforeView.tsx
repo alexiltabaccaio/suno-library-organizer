@@ -33,7 +33,6 @@ export const BeforeView: React.FC<BeforeViewProps> = ({
           isLiked={song.isLiked}
           isDisliked={song.isDisliked}
           isPinned={song.isPinned}
-          takeNumber={songsWithTakeNumbers.get(song.id)}
           createdAt={song.createdAt}
           onCheck={() => toggleCheck(song.id)}
           onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
