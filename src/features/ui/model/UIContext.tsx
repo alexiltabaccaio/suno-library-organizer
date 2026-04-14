@@ -8,7 +8,6 @@ import { COVER_GRADIENTS } from '../../../shared/lib/constants';
 interface UIContextType {
   selectedSongId: string | null;
   selectedItemId: string | null;
-  selectedItemIds: Set<string>;
   checkedSongIds: Set<string>;
   viewMode: 'before' | 'v1' | 'v2';
   setViewMode: (val: 'before' | 'v1' | 'v2') => void;
@@ -45,7 +44,6 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [checkedSongIds, setCheckedSongIds] = useState<Set<string>>(new Set());
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'before' | 'v1' | 'v2'>('v1');
@@ -67,7 +65,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const handleGroupRenamed = (e: any) => {
       const { oldKey, newKey } = e.detail;
       
-      setSelectedItemIds(prev => {
+      setCheckedSongIds(prev => {
         if (prev.has(oldKey)) {
           const next = new Set(prev);
           next.delete(oldKey);
@@ -134,12 +132,6 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     addSongs([song2, song1]);
     
-    setSelectedItemId(song2.id);
-    setSelectedItemIds(new Set([song2.id]));
-    setLastClickedId(song2.id);
-    if (!isMobile) {
-      setSelectedSongId(song2.id);
-    }
     setIsMobileEditorOpen(false);
   };
 
@@ -157,13 +149,13 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         const start = Math.min(lastIndex, currentIndex);
         const end = Math.max(lastIndex, currentIndex);
         const rangeIds = visibleIds.slice(start, end + 1);
-        setSelectedItemIds(new Set(rangeIds));
+        setCheckedSongIds(new Set(rangeIds));
       } else {
-        setSelectedItemIds(new Set([itemId]));
+        setCheckedSongIds(new Set([itemId]));
         setLastClickedId(itemId);
       }
     } else if (ctrlKey) {
-      setSelectedItemIds(prev => {
+      setCheckedSongIds(prev => {
         const next = new Set(prev);
         if (next.has(itemId)) {
           next.delete(itemId);
@@ -174,7 +166,6 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       });
       setLastClickedId(itemId);
     } else {
-      setSelectedItemIds(new Set([itemId]));
       setLastClickedId(itemId);
     }
   };
@@ -205,7 +196,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const closeDetails = () => {
     setSelectedSongId(null);
     setSelectedItemId(null);
-    setSelectedItemIds(new Set());
+    setCheckedSongIds(new Set());
     setLastClickedId(null);
   };
 
@@ -234,7 +225,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <UIContext.Provider value={{
-      selectedSongId, selectedItemId, selectedItemIds, checkedSongIds, viewMode, setViewMode,
+      selectedSongId, selectedItemId, checkedSongIds, viewMode, setViewMode,
       isMobileEditorOpen, setIsMobileEditorOpen, handleCreate, handleSelectItem,
       toggleCheck, toggleGroupCheck, closeDetails, selectedSong,
       filters, setFilters, toggleFilter,

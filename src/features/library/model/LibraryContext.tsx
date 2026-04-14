@@ -35,9 +35,9 @@ interface LibraryContextType {
   handleDelete: (itemIds: string[]) => void;
   handleRenameSong: (id: string, newTitle: string, isTitleRename?: boolean) => void;
   handleSetFavorite: (groupKey: string, songId: string) => void;
-  handleToggleLike: (id: string) => void;
-  handleToggleDislike: (id: string) => void;
-  handleTogglePin: (id: string) => void;
+  handleToggleLike: (idOrIds: string | string[], forceState?: boolean) => void;
+  handleToggleDislike: (idOrIds: string | string[], forceState?: boolean) => void;
+  handleTogglePin: (idOrIds: string | string[], forceState?: boolean) => void;
 }
 
 const LibraryContext = createContext<LibraryContextType | undefined>(undefined);
@@ -121,17 +121,24 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  const handleToggleLike = (id: string) => {
+  const handleToggleLike = (idOrIds: string | string[], forceState?: boolean) => {
     setSongs(prev => {
-      let targetId = id;
-      if (id.includes('|')) {
-        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
-        targetId = groupFavorites[id] || groupSongs[0]?.id;
-      }
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+      const targetIds = new Set<string>();
+      
+      ids.forEach(id => {
+        if (id.includes('|')) {
+          const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+          const targetId = groupFavorites[id] || groupSongs[0]?.id;
+          if (targetId) targetIds.add(targetId);
+        } else {
+          targetIds.add(id);
+        }
+      });
 
       return prev.map(song => {
-        if (song.id === targetId) {
-          const isLiked = !song.isLiked;
+        if (targetIds.has(song.id)) {
+          const isLiked = forceState !== undefined ? forceState : !song.isLiked;
           return { ...song, isLiked, isDisliked: isLiked ? false : song.isDisliked };
         }
         return song;
@@ -139,17 +146,24 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  const handleToggleDislike = (id: string) => {
+  const handleToggleDislike = (idOrIds: string | string[], forceState?: boolean) => {
     setSongs(prev => {
-      let targetId = id;
-      if (id.includes('|')) {
-        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
-        targetId = groupFavorites[id] || groupSongs[0]?.id;
-      }
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+      const targetIds = new Set<string>();
+      
+      ids.forEach(id => {
+        if (id.includes('|')) {
+          const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+          const targetId = groupFavorites[id] || groupSongs[0]?.id;
+          if (targetId) targetIds.add(targetId);
+        } else {
+          targetIds.add(id);
+        }
+      });
 
       return prev.map(song => {
-        if (song.id === targetId) {
-          const isDisliked = !song.isDisliked;
+        if (targetIds.has(song.id)) {
+          const isDisliked = forceState !== undefined ? forceState : !song.isDisliked;
           return { ...song, isDisliked, isLiked: isDisliked ? false : song.isLiked };
         }
         return song;
@@ -157,17 +171,28 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  const handleTogglePin = (id: string) => {
+  const handleTogglePin = (idOrIds: string | string[], forceState?: boolean) => {
     setSongs(prev => {
-      let targetId = id;
-      if (id.includes('|')) {
-        const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
-        targetId = groupFavorites[id] || groupSongs[0]?.id;
-      }
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+      const targetIds = new Set<string>();
+      
+      ids.forEach(id => {
+        if (id.includes('|')) {
+          const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
+          const targetId = groupFavorites[id] || groupSongs[0]?.id;
+          if (targetId) targetIds.add(targetId);
+        } else {
+          targetIds.add(id);
+        }
+      });
 
-      return prev.map(song => 
-        song.id === targetId ? { ...song, isPinned: !song.isPinned } : song
-      );
+      return prev.map(song => {
+        if (targetIds.has(song.id)) {
+          const isPinned = forceState !== undefined ? forceState : !song.isPinned;
+          return { ...song, isPinned };
+        }
+        return song;
+      });
     });
   };
 

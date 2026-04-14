@@ -55,7 +55,13 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               isPinned={song.isPinned}
               takeNumber={songsWithTakeNumbers.get(song.id)}
               onCheck={() => toggleCheck(song.id)}
-              onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+              onClick={(e) => {
+                if (e.ctrlKey || e.metaKey) {
+                  toggleCheck(song.id);
+                } else {
+                  handleSelectItem(song.id, song.id, e.shiftKey, false, visibleIds);
+                }
+              }}
               onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
             />
           );
@@ -94,7 +100,13 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               createdAt={favoriteSong.createdAt}
               isChecked={allGroupSongsChecked}
               onCheck={() => toggleGroupCheck(group.songs)}
-              onClick={(e) => handleSelectItem(group.key, favoriteSong.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+              onClick={(e) => {
+                if (e.ctrlKey || e.metaKey) {
+                  toggleGroupCheck(group.songs);
+                } else {
+                  handleSelectItem(group.key, favoriteSong.id, e.shiftKey, false, visibleIds);
+                }
+              }}
               onRename={(newTitle) => handleRenameSong(group.key, newTitle)}
               isGroupHeader={true}
               groupCount={group.songs.length}
@@ -125,7 +137,13 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
                       isPinned={song.isPinned}
                       takeNumber={songsWithTakeNumbers.get(song.id)}
                       onCheck={() => toggleCheck(song.id)}
-                      onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+                      onClick={(e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                          toggleCheck(song.id);
+                        } else {
+                          handleSelectItem(song.id, song.id, e.shiftKey, false, visibleIds);
+                        }
+                      }}
                       onRename={(newTitle) => handleRenameSong(song.id, newTitle)}
                       isChild={true}
                       createdAt={song.createdAt}

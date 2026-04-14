@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
 import { SongItem } from '../../../../entities/song/ui/SongItem';
 import { SongCard } from '../../../../entities/song/ui/SongCard';
@@ -11,7 +11,6 @@ import { useUI } from '../../../../features/ui/model/UIContext';
 interface V2GridViewProps {
   groupedSongs: SongGroup[];
   songsWithTakeNumbers: Map<string, number>;
-  checkedSongIds: Set<string>;
   visibleIds: string[];
   expandedGroups: Set<string>;
   groupFavorites: Record<string, string>;
@@ -26,7 +25,6 @@ interface V2GridViewProps {
 export const V2GridView: React.FC<V2GridViewProps> = ({
   groupedSongs,
   songsWithTakeNumbers,
-  checkedSongIds,
   visibleIds,
   expandedGroups,
   groupFavorites,
@@ -38,11 +36,12 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
   toggleGroup
 }) => {
   const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { selectedItemIds, subFilters, groupPages, setGroupPage } = useUI();
+  const { checkedSongIds, selectedSongId, subFilters, groupPages, setGroupPage } = useUI();
+  const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
   const SUB_ITEMS_PER_PAGE = 15;
 
   return (
-    <>
+    <div className="space-y-1">
       {groupedSongs.map(group => {
         if (group.songs.length === 1) {
           const song = group.songs[0];
@@ -99,7 +98,13 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
               createdAt={favoriteSong.createdAt}
               isChecked={allGroupSongsChecked}
               onCheck={() => toggleGroupCheck(group.songs)}
-              onClick={(e) => handleSelectItem(group.key, favoriteSong.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+              onClick={(e) => {
+                if (e.ctrlKey || e.metaKey) {
+                  toggleGroupCheck(group.songs);
+                } else {
+                  handleSelectItem(group.key, favoriteSong.id, e.shiftKey, false, visibleIds);
+                }
+              }}
               onRename={(newTitle) => handleRenameSong(group.key, newTitle)}
               isGroupHeader={true}
               groupCount={group.songs.length}
@@ -116,31 +121,65 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
                 
                 {/* Fixed Dynamic Action Column */}
                 <div className={`flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
-                  paginatedSubSongs.some(s => selectedItemIds.has(s.id)) 
+                  paginatedSubSongs.some(s => checkedSongIds.has(s.id)) || paginatedSubSongs.some(s => s.id === selectedSongId)
                     ? 'opacity-100' 
                     : 'opacity-0 group-hover/actions:opacity-100 pointer-events-none group-hover/actions:pointer-events-auto'
                 }`}>
                   {(() => {
-                    const activeSong = paginatedSubSongs.find(s => selectedItemIds.has(s.id)) || favoriteSong;
+                    const hoveredInRow = paginatedSubSongs.find(s => s.id === hoveredSongId);
+                    const detailInRow = paginatedSubSongs.find(s => s.id === selectedSongId);
+                    const selectedInRow = paginatedSubSongs.filter(s => checkedSongIds.has(s.id));
+                    
+                    let displayState = {
+                      isLiked: false,
+                      isDisliked: false,
+                      isPinned: false
+                    };
+
+                    if (hoveredInRow) {
+                      displayState = { isLiked: hoveredInRow.isLiked, isDisliked: hoveredInRow.isDisliked, isPinned: hoveredInRow.isPinned };
+                    } else if (selectedInRow.length > 0) {
+                      displayState = {
+                        isLiked: selectedInRow.every(s => s.isLiked),
+                        isDisliked: selectedInRow.every(s => s.isDisliked),
+                        isPinned: selectedInRow.every(s => s.isPinned)
+                      };
+                    } else if (detailInRow) {
+                      displayState = { isLiked: detailInRow.isLiked, isDisliked: detailInRow.isDisliked, isPinned: detailInRow.isPinned };
+                    } else {
+                      displayState = { isLiked: favoriteSong.isLiked, isDisliked: favoriteSong.isDisliked, isPinned: favoriteSong.isPinned };
+                    }
+
+                    const targetIds = selectedInRow.length > 0 ? selectedInRow.map(s => s.id) : (detailInRow ? [detailInRow.id] : [favoriteSong.id]);
+
                     return (
                       <>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleToggleLike(activeSong.id); }}
-                          className={`transition-colors ${activeSong.isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            handleToggleLike(targetIds, !displayState.isLiked); 
+                          }}
+                          className={`transition-colors ${displayState.isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
                         >
-                          <ThumbsUp className="w-3.5 h-3.5" fill={activeSong.isLiked ? "currentColor" : "none"} />
+                          <ThumbsUp className="w-3.5 h-3.5" fill={displayState.isLiked ? "currentColor" : "none"} />
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleToggleDislike(activeSong.id); }}
-                          className={`transition-colors ${activeSong.isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            handleToggleDislike(targetIds, !displayState.isDisliked); 
+                          }}
+                          className={`transition-colors ${displayState.isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
                         >
-                          <ThumbsDown className="w-3.5 h-3.5" fill={activeSong.isDisliked ? "currentColor" : "none"} />
+                          <ThumbsDown className="w-3.5 h-3.5" fill={displayState.isDisliked ? "currentColor" : "none"} />
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleTogglePin(activeSong.id); }}
-                          className={`transition-colors ${activeSong.isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            handleTogglePin(targetIds, !displayState.isPinned); 
+                          }}
+                          className={`transition-colors ${displayState.isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
                         >
-                          <Pin className="w-3.5 h-3.5" fill={activeSong.isPinned ? "currentColor" : "none"} />
+                          <Pin className="w-3.5 h-3.5" fill={displayState.isPinned ? "currentColor" : "none"} />
                         </button>
                       </>
                     );
@@ -148,7 +187,7 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <HorizontalScrollContainer className="pl-1 gap-2">
+                  <HorizontalScrollContainer className="pl-1 gap-2 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 has-[.is-selected]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25">
                     {paginatedSubSongs.map((song) => (
                       <SongCard 
                         key={song.id}
@@ -160,9 +199,17 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
                         isPinned={song.isPinned}
                         takeNumber={songsWithTakeNumbers.get(song.id)}
                         onCheck={() => toggleCheck(song.id)}
-                        onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+                        onClick={(e) => {
+                          if (e.ctrlKey || e.metaKey) {
+                            toggleCheck(song.id);
+                          } else {
+                            handleSelectItem(song.id, song.id, e.shiftKey, false, visibleIds);
+                          }
+                        }}
                         isFavorite={groupFavorites[group.key] === song.id}
                         onSetFavorite={() => handleSetFavorite(group.key, song.id)}
+                        onMouseEnter={() => setHoveredSongId(song.id)}
+                        onMouseLeave={() => setHoveredSongId(null)}
                       />
                     ))}
                   </HorizontalScrollContainer>
@@ -172,6 +219,6 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
           </div>
         );
       })}
-    </>
+    </div>
   );
 };

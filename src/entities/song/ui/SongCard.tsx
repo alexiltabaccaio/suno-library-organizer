@@ -16,16 +16,19 @@ interface SongCardProps {
   isDisliked?: boolean;
   isPinned?: boolean;
   takeNumber?: number;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export const SongCard: React.FC<SongCardProps> = ({ 
   id, duration, coverColor, onClick, onCheck,
-  isFavorite, onSetFavorite, isLiked, isDisliked, isPinned, takeNumber
+  isFavorite, onSetFavorite, isLiked, isDisliked, isPinned, takeNumber,
+  onMouseEnter, onMouseLeave
 }) => {
   const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { selectedItemIds, checkedSongIds } = useUI();
+  const { checkedSongIds } = useUI();
 
-  const isSelected = selectedItemIds.has(id);
+  const isSelected = checkedSongIds.has(id);
   const isChecked = checkedSongIds.has(id);
   const [showMenu, setShowMenu] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
@@ -45,24 +48,24 @@ export const SongCard: React.FC<SongCardProps> = ({
   };
 
   const onDelete = () => {
-    if (selectedItemIds.has(id)) {
-      handleDelete(Array.from(selectedItemIds));
+    if (checkedSongIds.has(id)) {
+      handleDelete(Array.from(checkedSongIds));
     } else {
       handleDelete([id]);
     }
   };
 
   const onDeleteExcludeFavorite = () => {
-    if (selectedItemIds.has(id)) {
+    if (checkedSongIds.has(id)) {
       const favoriteIds = new Set(Object.values(groupFavorites));
-      const idsToDelete = (Array.from(selectedItemIds) as string[]).filter(itemId => {
+      const idsToDelete = (Array.from(checkedSongIds) as string[]).filter(itemId => {
         if (favoriteIds.has(itemId)) return false;
         if (itemId.includes('|')) return false;
         return true;
       });
 
       const finalIdsToDelete: string[] = [...idsToDelete];
-      (Array.from(selectedItemIds) as string[]).forEach(itemId => {
+      (Array.from(checkedSongIds) as string[]).forEach(itemId => {
         if (itemId.includes('|')) {
           const groupKey = itemId;
           const groupSongs = songs.filter(s => `${s.title}|${s.styles}|${s.lyrics}` === groupKey);
@@ -78,8 +81,8 @@ export const SongCard: React.FC<SongCardProps> = ({
   };
 
   const canExcludeFavorite = () => {
-    if (!selectedItemIds.has(id)) return false;
-    const selection = Array.from(selectedItemIds) as string[];
+    if (!checkedSongIds.has(id)) return false;
+    const selection = Array.from(checkedSongIds) as string[];
     const favoriteIds = new Set(Object.values(groupFavorites));
     
     if (selection.length > 1) {
@@ -95,7 +98,9 @@ export const SongCard: React.FC<SongCardProps> = ({
       <div 
         onClick={onClick}
         onContextMenu={handleContextMenu}
-        className="relative flex items-center group cursor-pointer transition-colors py-1.5"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={`relative flex items-center group cursor-pointer transition-all duration-300 py-1.5 song-card ${isSelected ? 'is-selected' : ''}`}
       >
         {/* Artwork Container */}
         <div className={`relative w-(--song-w-child) h-(--song-h-child) rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>
@@ -125,7 +130,7 @@ export const SongCard: React.FC<SongCardProps> = ({
 
           {/* Play Button Overlay */}
           <div className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
-            <svg viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-lg w-4 h-4 ml-0.5">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-lg w-5 h-5 ml-0.5">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>

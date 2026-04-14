@@ -57,9 +57,9 @@ export const SongItem: React.FC<SongItemProps> = ({
   subPage = 1, totalSubPages = 1, onSubPageChange
 }) => {
   const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { selectedItemIds, checkedSongIds, subFilters, toggleSubFilter } = useUI();
+  const { checkedSongIds, subFilters, toggleSubFilter } = useUI();
 
-  const isSelected = selectedItemIds.has(id);
+  const isSelected = checkedSongIds.has(id);
   const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(notes || title);
@@ -127,18 +127,18 @@ export const SongItem: React.FC<SongItemProps> = ({
   };
 
   const onDelete = () => {
-    if (selectedItemIds.has(id)) {
-      handleDelete(Array.from(selectedItemIds));
+    if (checkedSongIds.has(id)) {
+      handleDelete(Array.from(checkedSongIds));
     } else {
       handleDelete([id]);
     }
   };
 
   const onDeleteExcludeFavorite = () => {
-    if (selectedItemIds.has(id) && selectedItemIds.size > 1) {
+    if (checkedSongIds.has(id) && checkedSongIds.size > 1) {
       // Find which IDs in the selection are favorites
       const favoriteIds = new Set(Object.values(groupFavorites));
-      const idsToDelete = (Array.from(selectedItemIds) as string[]).filter(itemId => {
+      const idsToDelete = (Array.from(checkedSongIds) as string[]).filter(itemId => {
         // If it's a song ID, check if it's a favorite
         if (favoriteIds.has(itemId)) return false;
         
@@ -153,7 +153,7 @@ export const SongItem: React.FC<SongItemProps> = ({
 
       // Special case: if a group header is selected, we should delete all its songs EXCEPT the favorite
       const finalIdsToDelete: string[] = [...idsToDelete];
-      (Array.from(selectedItemIds) as string[]).forEach(itemId => {
+      (Array.from(checkedSongIds) as string[]).forEach(itemId => {
         if (itemId.includes('|')) {
           const groupKey = itemId;
           const groupSongs = songs.filter(s => `${s.title}|${s.styles}|${s.lyrics}` === groupKey);
@@ -184,8 +184,8 @@ export const SongItem: React.FC<SongItemProps> = ({
       return true;
     }
 
-    if (!selectedItemIds.has(id)) return false;
-    const selection = Array.from(selectedItemIds) as string[];
+    if (!checkedSongIds.has(id)) return false;
+    const selection = Array.from(checkedSongIds) as string[];
     const favoriteIds = new Set(Object.values(groupFavorites));
     
     // If multiple items are selected, show if there's at least one explicit favorite to keep

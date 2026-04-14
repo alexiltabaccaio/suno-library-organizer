@@ -18,7 +18,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
     songs, handleRenameSong, handleSetFavorite, groupFavorites
   } = useLibrary();
   const {
-    selectedItemIds, checkedSongIds, handleSelectItem, toggleCheck, toggleGroupCheck, viewMode, setViewMode,
+    checkedSongIds, handleSelectItem, toggleCheck, toggleGroupCheck, viewMode, setViewMode,
     filters, toggleFilter, subFilters, toggleSubFilter
   } = useUI();
   const { formattingMode, setFormattingMode } = useEditor();

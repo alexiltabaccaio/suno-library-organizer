@@ -35,7 +35,13 @@ export const BeforeView: React.FC<BeforeViewProps> = ({
           isPinned={song.isPinned}
           createdAt={song.createdAt}
           onCheck={() => toggleCheck(song.id)}
-          onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+          onClick={(e) => {
+            if (e.ctrlKey || e.metaKey) {
+              toggleCheck(song.id);
+            } else {
+              handleSelectItem(song.id, song.id, e.shiftKey, false, visibleIds);
+            }
+          }}
           onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
         />
       ))}

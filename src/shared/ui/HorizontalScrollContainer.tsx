@@ -69,15 +69,6 @@ export const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps>
       >
         {children}
       </div>
-      
-      {showRightArrow && (
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-zinc-900/80 border border-zinc-800/50 rounded-full text-zinc-400 hover:text-white shadow-xl opacity-0 group-hover/scroll:opacity-100 transition-opacity"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
     </div>
   );
 };
