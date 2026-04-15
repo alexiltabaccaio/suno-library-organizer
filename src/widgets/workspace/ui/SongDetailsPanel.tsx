@@ -62,7 +62,7 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
         </div>
 
         {/* Remix Button */}
-        <button className="w-full flex items-center justify-center gap-2 bg-[#19191b] hover:bg-[#202024] transition-colors rounded-full py-3.5 text-zinc-300 font-medium mb-6">
+        <button className="w-full flex items-center justify-center gap-2 bg-[#19191b] rounded-full py-3.5 text-zinc-500 font-medium mb-6 opacity-40 grayscale pointer-events-none cursor-default">
           <Music className="w-4 h-4" />
           Remix/Edit
         </button>

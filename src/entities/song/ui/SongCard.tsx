@@ -103,7 +103,7 @@ export const SongCard: React.FC<SongCardProps> = ({
         onContextMenu={handleContextMenu}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        className={`relative flex items-center group cursor-pointer py-1.5 song-card ${isSelected ? 'is-selected' : ''}`}
+        className={`relative flex items-center group cursor-pointer py-1.5 px-1 song-card ${isSelected ? 'is-selected' : ''}`}
       >
         {/* Artwork Container */}
         <div className={`relative w-(--song-w-child) h-(--song-h-child) rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>

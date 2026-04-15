@@ -7,8 +7,8 @@ interface ActionButtonsProps {
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({ className, variant = 'default' }) => {
   const btnClass = variant === 'header' 
-    ? "flex items-center justify-center gap-1 px-2 py-1.5 text-[11px] font-bold bg-zinc-800/40 rounded-lg text-zinc-500 opacity-50 cursor-not-allowed transition-colors"
-    : "flex items-center justify-center gap-1.5 bg-[#19191b] rounded-xl py-3.5 text-sm font-medium opacity-50 cursor-not-allowed text-zinc-500";
+    ? "flex items-center justify-center gap-1 px-2 py-1.5 text-[11px] font-bold bg-zinc-800/40 rounded-lg text-zinc-500 opacity-50 cursor-default transition-colors"
+    : "flex items-center justify-center gap-1.5 bg-[#19191b] rounded-xl py-3.5 text-sm font-medium opacity-50 cursor-default text-zinc-500";
 
   return (
     <div className={className || "grid grid-cols-3 gap-2"}>

@@ -1,24 +1,23 @@
 import React from 'react';
 import { SongItem } from '../../../../entities/song/ui/SongItem';
 import { Song } from '../../../../entities/song/model/types';
+import { useUI } from '../../../../features/ui/model/UIContext';
+import { useLibrary } from '../../../../features/library/model/LibraryContext';
 
 interface BeforeViewProps {
   songs: Song[];
   songsWithTakeNumbers: Map<string, number>;
   visibleIds: string[];
-  toggleCheck: (id: string) => void;
-  handleSelectItem: (itemId: string, songId: string, shiftKey?: boolean, ctrlKey?: boolean, visibleIds?: string[]) => void;
-  handleRenameSong: (id: string, newTitle: string, isTitleRename?: boolean) => void;
 }
 
 export const BeforeView: React.FC<BeforeViewProps> = ({
   songs,
   songsWithTakeNumbers,
   visibleIds,
-  toggleCheck,
-  handleSelectItem,
-  handleRenameSong
 }) => {
+  const { toggleCheck, handleSelectItem } = useUI();
+  const { handleRenameSong } = useLibrary();
+
   return (
     <>
       {songs.map(song => (

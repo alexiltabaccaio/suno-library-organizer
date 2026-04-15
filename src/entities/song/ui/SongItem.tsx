@@ -309,14 +309,14 @@ export const SongItem: React.FC<SongItemProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 min-w-0">
-                  <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : `text-zinc-600 text-[13px] ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`) : 'text-zinc-100 text-[16px]'}`}>
+                  <h3 className={`font-bold truncate transition-all duration-200 ease-out ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : `text-zinc-600 text-[13px] ${isSelected ? 'opacity-100 max-w-[200px]' : 'opacity-0 max-w-0 lg:group-hover:opacity-100 lg:group-hover:max-w-[200px]'}`) : 'text-zinc-100 text-[16px]'}`}>
                     {isChild ? (isRenamed ? notes : 'Add a note...') : title}
                   </h3>
                   <div className="flex items-center gap-1">
-                    <div className={`flex items-center overflow-hidden ${isSelected ? (isChild ? 'w-5' : 'w-6') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
+                    <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? (isChild ? 'w-5 opacity-100' : 'w-6 opacity-100') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
                       <button 
                         onClick={handleStartEdit}
-                        className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
                       >
                         <Pencil className={isChild ? "w-3 h-3" : "w-4 h-4"} />
                       </button>

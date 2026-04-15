@@ -10,7 +10,7 @@ export const SongMetadata: React.FC<SongMetadataProps> = ({ title, setTitle }) =
   return (
     <>
       {/* More Options */}
-      <button className="w-full flex items-center gap-2 bg-[#19191b] rounded-xl p-4 font-medium cursor-default text-[15px] text-zinc-500">
+      <button className="w-full flex items-center gap-2 bg-[#19191b] rounded-xl p-4 font-medium cursor-default text-[15px] text-zinc-500 opacity-40 grayscale pointer-events-none">
         <ChevronRight className="w-4 h-4" />
         More Options
       </button>
@@ -28,7 +28,7 @@ export const SongMetadata: React.FC<SongMetadataProps> = ({ title, setTitle }) =
       </div>
 
       {/* Save to */}
-      <div className="flex items-center justify-between bg-[#19191b] rounded-xl p-4">
+      <div className="flex items-center justify-between bg-[#19191b] rounded-xl p-4 opacity-40 grayscale pointer-events-none">
         <div className="flex items-center gap-3">
           <Folder className="w-4 h-4 text-zinc-600 fill-zinc-600" />
           <span className="text-[15px] font-medium text-zinc-500">Save to...</span>
