@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { ChevronRight, Pencil, Search, Filter, ChevronDown, ChevronLeft, ListFilter, Sparkles, Type, Highlighter, Palette, ThumbsUp, ThumbsDown, EyeOff, Check } from 'lucide-react';
 import { useLibrary } from '../../../features/library/model/LibraryContext';
 import { useUI } from '../../../features/ui/model/UIContext';
@@ -19,7 +20,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
   } = useLibrary();
   const {
     checkedSongIds, handleSelectItem, toggleCheck, toggleGroupCheck, viewMode, setViewMode,
-    filters, toggleFilter, subFilters, toggleSubFilter
+    filters, toggleFilter, subFilters, toggleSubFilter, selectedSong, clearItemSelection
   } = useUI();
   const { formattingMode, setFormattingMode } = useEditor();
 
@@ -64,7 +65,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
     setCurrentPage(1);
   }, [viewMode]);
 
-  const { sortedSongs, groupedSongs, songsWithTakeNumbers } = useSongGrouping(songs);
+  const { sortedSongs, groupedSongs, songsWithTakeNumbers } = useSongGrouping(songs, groupFavorites);
 
   // Filter logic
   const filteredGroupedSongs = useMemo(() => {
@@ -159,9 +160,15 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
   };
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-[#101012] overflow-hidden">
+    <div 
+      className="flex-1 h-full flex flex-col bg-[#101012] overflow-hidden"
+      onClick={() => clearItemSelection()}
+    >
       {/* Header */}
-      <div className="px-4 pt-6 pb-4 flex items-center justify-between">
+      <div 
+        className="px-4 pt-6 pb-4 flex items-center justify-between"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center gap-2 text-[15px] font-medium">
           <span className="text-zinc-100">Workspaces</span>
           <ChevronRight className="w-4 h-4 text-zinc-500" />
@@ -283,7 +290,9 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
       </div>
 
       {/* Song List */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div 
+        className="flex-1 overflow-y-auto px-4 py-4 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      >
         <div className="space-y-1 relative pl-0">
           {viewMode === 'before' ? (
             <BeforeView 
@@ -330,9 +339,51 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
 
       {/* New Footer */}
       {!hideFooter && (
-        <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 items-center px-6 py-8 border-t border-zinc-800/50 bg-[#101012] gap-8">
-          {/* Left Spacer for centering */}
-          <div className="hidden lg:block order-1"></div>
+        <motion.div 
+          initial={false}
+          animate={{ paddingRight: selectedSong ? 24 : 404 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="hidden md:grid grid-cols-1 lg:grid-cols-3 items-center px-6 py-8 border-t border-zinc-800/50 bg-[#101012] gap-8 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Smart Lyrics Editor Badge - Left Aligned */}
+          <div className="flex flex-col items-center lg:items-start gap-2 order-1">
+            <a 
+              href="https://github.com/alexiltabaccaio/suno-flow-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-zinc-600 hover:text-zinc-400 transition-colors cursor-pointer group"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-pink-500/50 group-hover:text-pink-400 transition-colors" />
+              <span className="text-[11px] font-medium tracking-widest uppercase">
+                Smart Lyrics Editor
+              </span>
+            </a>
+            
+            <div className="flex items-center bg-zinc-900/50 rounded-lg p-0.5 border border-zinc-800/50">
+              <button
+                onClick={() => setFormattingMode('none')}
+                className={`p-1 rounded-md transition-all ${formattingMode === 'none' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
+                title="Plain text"
+              >
+                <Type className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setFormattingMode('simple')}
+                className={`p-1 rounded-md transition-all ${formattingMode === 'simple' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
+                title="B&W Formatting"
+              >
+                <Highlighter className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setFormattingMode('colored')}
+                className={`p-1 rounded-md transition-all ${formattingMode === 'colored' ? 'bg-cyan-500/20 text-cyan-400 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
+                title="Color formatting"
+              >
+                <Palette className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
 
           {/* Center Content */}
           <div className="flex flex-col items-center gap-4 order-2">
@@ -388,45 +439,9 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
             </p>
           </div>
 
-          {/* Smart Lyrics Editor Badge - Right Aligned */}
-          <div className="flex flex-col items-center lg:items-end gap-2 order-3">
-            <a 
-              href="https://github.com/alexiltabaccaio/suno-flow-editor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-zinc-600 hover:text-zinc-400 transition-colors cursor-pointer group"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-pink-500/50 group-hover:text-pink-400 transition-colors" />
-              <span className="text-[11px] font-medium tracking-widest uppercase">
-                Smart Lyrics Editor
-              </span>
-            </a>
-            
-            <div className="flex items-center bg-zinc-900/50 rounded-lg p-0.5 border border-zinc-800/50">
-              <button
-                onClick={() => setFormattingMode('none')}
-                className={`p-1 rounded-md transition-all ${formattingMode === 'none' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
-                title="Plain text"
-              >
-                <Type className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setFormattingMode('simple')}
-                className={`p-1 rounded-md transition-all ${formattingMode === 'simple' ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
-                title="B&W Formatting"
-              >
-                <Highlighter className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setFormattingMode('colored')}
-                className={`p-1 rounded-md transition-all ${formattingMode === 'colored' ? 'bg-cyan-500/20 text-cyan-400 shadow-sm' : 'text-zinc-600 hover:text-zinc-400'}`}
-                title="Color formatting"
-              >
-                <Palette className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
+          {/* Right Spacer for centering */}
+          <div className="hidden lg:block order-3"></div>
+        </motion.div>
       )}
     </div>
   );

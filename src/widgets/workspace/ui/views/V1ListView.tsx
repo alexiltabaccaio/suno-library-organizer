@@ -33,7 +33,7 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
   handleSetFavorite,
   toggleGroup
 }) => {
-  const { subFilters, groupPages, setGroupPage } = useUI();
+  const { handleQuickGenerate, subFilters, groupPages, setGroupPage } = useUI();
   const SUB_ITEMS_PER_PAGE = 15;
 
   return (
@@ -47,6 +47,7 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               id={song.id}
               title={song.title}
               styles={song.styles}
+              lyrics={song.lyrics}
               duration={song.duration}
               version={song.version}
               coverColor={song.coverColor}
@@ -90,6 +91,7 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               id={group.key}
               title={favoriteSong.title}
               styles={favoriteSong.styles}
+              lyrics={favoriteSong.lyrics}
               duration={favoriteSong.duration}
               version={favoriteSong.version}
               coverColor={favoriteSong.coverColor}
@@ -115,6 +117,11 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
               subPage={subPage}
               totalSubPages={totalSubPages}
               onSubPageChange={(page) => setGroupPage(group.key, page)}
+              onQuickGenerate={(e) => {
+                e.stopPropagation();
+                handleQuickGenerate(favoriteSong);
+                if (!isExpanded) toggleGroup(e, group.key);
+              }}
             />
             
             {isExpanded && (
@@ -127,6 +134,7 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
                       id={song.id}
                       title={song.title}
                       styles={song.styles}
+                      lyrics={song.lyrics}
                       duration={song.duration}
                       version={song.version}
                       coverColor={song.coverColor}

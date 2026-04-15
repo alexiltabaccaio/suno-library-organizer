@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pin, Plus } from 'lucide-react';
 import { SongItem } from '../../../../entities/song/ui/SongItem';
 import { SongCard } from '../../../../entities/song/ui/SongCard';
 import { Song } from '../../../../entities/song/model/types';
@@ -36,8 +36,9 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
   toggleGroup
 }) => {
   const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds, selectedSongId, subFilters, groupPages, setGroupPage } = useUI();
+  const { checkedSongIds, selectedSongId, selectedItemId, subFilters, groupPages, setGroupPage, handleQuickGenerate } = useUI();
   const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
+  const [hoveredActionsGroupKey, setHoveredActionsGroupKey] = useState<string | null>(null);
   const SUB_ITEMS_PER_PAGE = 15;
 
   return (
@@ -51,6 +52,7 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
               id={song.id}
               title={song.title}
               styles={song.styles}
+              lyrics={song.lyrics}
               duration={song.duration}
               version={song.version}
               coverColor={song.coverColor}
@@ -88,6 +90,7 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
               id={group.key}
               title={favoriteSong.title}
               styles={favoriteSong.styles}
+              lyrics={favoriteSong.lyrics}
               duration={favoriteSong.duration}
               version={favoriteSong.version}
               coverColor={favoriteSong.coverColor}
@@ -113,6 +116,11 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
               subPage={subPage}
               totalSubPages={totalSubPages}
               onSubPageChange={(page) => setGroupPage(group.key, page)}
+              onQuickGenerate={(e) => {
+                e.stopPropagation();
+                handleQuickGenerate(favoriteSong);
+                if (!isExpanded) toggleGroup(e, group.key);
+              }}
             />
             
             {isExpanded && (
@@ -120,71 +128,76 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
                 <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
                 
                 {/* Fixed Dynamic Action Column */}
-                <div className={`flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
-                  paginatedSubSongs.some(s => checkedSongIds.has(s.id)) || paginatedSubSongs.some(s => s.id === selectedSongId)
-                    ? 'opacity-100' 
-                    : 'opacity-0 group-hover/actions:opacity-100 pointer-events-none group-hover/actions:pointer-events-auto'
-                }`}>
-                  {(() => {
-                    const hoveredInRow = paginatedSubSongs.find(s => s.id === hoveredSongId);
-                    const detailInRow = paginatedSubSongs.find(s => s.id === selectedSongId);
-                    const selectedInRow = paginatedSubSongs.filter(s => checkedSongIds.has(s.id));
-                    
-                    let displayState = {
-                      isLiked: false,
-                      isDisliked: false,
-                      isPinned: false
+                {(() => {
+                  const hasChecked = paginatedSubSongs.some(s => checkedSongIds.has(s.id));
+                  const isHovered = paginatedSubSongs.some(s => s.id === hoveredSongId) || hoveredActionsGroupKey === group.key;
+                  const isItemSelected = paginatedSubSongs.some(s => s.id === selectedItemId);
+                  const isVisible = hasChecked || isHovered || isItemSelected;
+
+                  const detailInRow = paginatedSubSongs.find(s => s.id === selectedSongId || s.id === selectedItemId);
+                  const hoveredInRow = paginatedSubSongs.find(s => s.id === hoveredSongId);
+                  const selectedInRow = paginatedSubSongs.filter(s => checkedSongIds.has(s.id));
+                  
+                  const targetIds = selectedInRow.length > 0 ? selectedInRow.map(s => s.id) : (detailInRow ? [detailInRow.id] : [favoriteSong.id]);
+
+                  let displayState = {
+                    isLiked: false,
+                    isDisliked: false,
+                    isPinned: false
+                  };
+
+                  if (hoveredInRow) {
+                    displayState = { isLiked: hoveredInRow.isLiked, isDisliked: hoveredInRow.isDisliked, isPinned: hoveredInRow.isPinned };
+                  } else if (selectedInRow.length > 0) {
+                    displayState = {
+                      isLiked: selectedInRow.every(s => s.isLiked),
+                      isDisliked: selectedInRow.every(s => s.isDisliked),
+                      isPinned: selectedInRow.every(s => s.isPinned)
                     };
+                  } else if (detailInRow) {
+                    displayState = { isLiked: detailInRow.isLiked, isDisliked: detailInRow.isDisliked, isPinned: detailInRow.isPinned };
+                  } else {
+                    displayState = { isLiked: favoriteSong.isLiked, isDisliked: favoriteSong.isDisliked, isPinned: favoriteSong.isPinned };
+                  }
 
-                    if (hoveredInRow) {
-                      displayState = { isLiked: hoveredInRow.isLiked, isDisliked: hoveredInRow.isDisliked, isPinned: hoveredInRow.isPinned };
-                    } else if (selectedInRow.length > 0) {
-                      displayState = {
-                        isLiked: selectedInRow.every(s => s.isLiked),
-                        isDisliked: selectedInRow.every(s => s.isDisliked),
-                        isPinned: selectedInRow.every(s => s.isPinned)
-                      };
-                    } else if (detailInRow) {
-                      displayState = { isLiked: detailInRow.isLiked, isDisliked: detailInRow.isDisliked, isPinned: detailInRow.isPinned };
-                    } else {
-                      displayState = { isLiked: favoriteSong.isLiked, isDisliked: favoriteSong.isDisliked, isPinned: favoriteSong.isPinned };
-                    }
-
-                    const targetIds = selectedInRow.length > 0 ? selectedInRow.map(s => s.id) : (detailInRow ? [detailInRow.id] : [favoriteSong.id]);
-
-                    return (
-                      <>
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            handleToggleLike(targetIds, !displayState.isLiked); 
-                          }}
-                          className={`transition-colors ${displayState.isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5" fill={displayState.isLiked ? "currentColor" : "none"} />
-                        </button>
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            handleToggleDislike(targetIds, !displayState.isDisliked); 
-                          }}
-                          className={`transition-colors ${displayState.isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" fill={displayState.isDisliked ? "currentColor" : "none"} />
-                        </button>
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            handleTogglePin(targetIds, !displayState.isPinned); 
-                          }}
-                          className={`transition-colors ${displayState.isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-                        >
-                          <Pin className="w-3.5 h-3.5" fill={displayState.isPinned ? "currentColor" : "none"} />
-                        </button>
-                      </>
-                    );
-                  })()}
-                </div>
+                  return (
+                    <div 
+                      onMouseEnter={() => setHoveredActionsGroupKey(group.key)}
+                      onMouseLeave={() => setHoveredActionsGroupKey(null)}
+                      className={`flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
+                        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
+                    >
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleToggleLike(targetIds, !displayState.isLiked); 
+                        }}
+                        className={`transition-colors ${displayState.isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" fill={displayState.isLiked ? "currentColor" : "none"} />
+                      </button>
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleToggleDislike(targetIds, !displayState.isDisliked); 
+                        }}
+                        className={`transition-colors ${displayState.isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                      >
+                        <ThumbsDown className="w-3.5 h-3.5" fill={displayState.isDisliked ? "currentColor" : "none"} />
+                      </button>
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleTogglePin(targetIds, !displayState.isPinned); 
+                        }}
+                        className={`transition-colors ${displayState.isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
+                      >
+                        <Pin className="w-3.5 h-3.5" fill={displayState.isPinned ? "currentColor" : "none"} />
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 <div className="flex-1 min-w-0">
                   <HorizontalScrollContainer className="pl-1 gap-2 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 has-[.is-selected]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25">

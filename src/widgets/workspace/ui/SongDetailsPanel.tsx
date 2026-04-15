@@ -15,7 +15,7 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
 }) => {
   const { formattingMode } = useEditor();
   return (
-    <div className="w-[380px] bg-[#101012] h-full flex flex-col shrink-0 border-l border-zinc-800/50">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <div className="p-4 flex justify-end shrink-0">
         <button 

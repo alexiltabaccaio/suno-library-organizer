@@ -7,10 +7,14 @@ export interface SongGroup {
   songs: Song[];
 }
 
-export const useSongGrouping = (songs: Song[]) => {
-  // 1. Sort all songs by date (newest first)
+export const useSongGrouping = (songs: Song[], groupFavorites: Record<string, string>) => {
+  // 1. Sort all songs by date (newest first), but put pinned songs first
   const sortedSongs = useMemo(() => {
-    return [...songs].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return [...songs].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
   }, [songs]);
 
   // 2. Group songs by metadata
@@ -24,11 +28,33 @@ export const useSongGrouping = (songs: Song[]) => {
       groups[key].push(song);
     });
 
-    return Object.entries(groups).map(([key, songs]) => ({
-      key,
-      songs
-    }));
-  }, [sortedSongs]);
+    return Object.entries(groups).map(([key, songs]) => {
+      // Sort songs within the group: pinned first, then by date
+      const sortedGroupSongs = [...songs].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+
+      return {
+        key,
+        songs: sortedGroupSongs
+      };
+    }).sort((a, b) => {
+      // Sort groups: if the favorite song of a group is pinned, the group goes first
+      const favIdA = groupFavorites[a.key] || a.songs[0].id;
+      const favSongA = a.songs.find(s => s.id === favIdA) || a.songs[0];
+      
+      const favIdB = groupFavorites[b.key] || b.songs[0].id;
+      const favSongB = b.songs.find(s => s.id === favIdB) || b.songs[0];
+
+      if (favSongA.isPinned && !favSongB.isPinned) return -1;
+      if (!favSongA.isPinned && favSongB.isPinned) return 1;
+      
+      // Fallback to the date of the favorite song
+      return favSongB.createdAt.getTime() - favSongA.createdAt.getTime();
+    });
+  }, [sortedSongs, groupFavorites]);
 
   // 3. Calculate take numbers for each song within its group
   const songsWithTakeNumbers = useMemo(() => {

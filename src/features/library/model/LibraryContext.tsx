@@ -121,7 +121,11 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  const handleToggleLike = (idOrIds: string | string[], forceState?: boolean) => {
+  const toggleSongProperty = (
+    idOrIds: string | string[], 
+    property: 'isLiked' | 'isDisliked' | 'isPinned',
+    forceState?: boolean
+  ) => {
     setSongs(prev => {
       const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
       const targetIds = new Set<string>();
@@ -138,62 +142,31 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       return prev.map(song => {
         if (targetIds.has(song.id)) {
-          const isLiked = forceState !== undefined ? forceState : !song.isLiked;
-          return { ...song, isLiked, isDisliked: isLiked ? false : song.isDisliked };
+          const newState = forceState !== undefined ? forceState : !song[property];
+          
+          if (property === 'isLiked') {
+            return { ...song, isLiked: newState, isDisliked: newState ? false : song.isDisliked };
+          }
+          if (property === 'isDisliked') {
+            return { ...song, isDisliked: newState, isLiked: newState ? false : song.isLiked };
+          }
+          return { ...song, [property]: newState };
         }
         return song;
       });
     });
+  };
+
+  const handleToggleLike = (idOrIds: string | string[], forceState?: boolean) => {
+    toggleSongProperty(idOrIds, 'isLiked', forceState);
   };
 
   const handleToggleDislike = (idOrIds: string | string[], forceState?: boolean) => {
-    setSongs(prev => {
-      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-      const targetIds = new Set<string>();
-      
-      ids.forEach(id => {
-        if (id.includes('|')) {
-          const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
-          const targetId = groupFavorites[id] || groupSongs[0]?.id;
-          if (targetId) targetIds.add(targetId);
-        } else {
-          targetIds.add(id);
-        }
-      });
-
-      return prev.map(song => {
-        if (targetIds.has(song.id)) {
-          const isDisliked = forceState !== undefined ? forceState : !song.isDisliked;
-          return { ...song, isDisliked, isLiked: isDisliked ? false : song.isLiked };
-        }
-        return song;
-      });
-    });
+    toggleSongProperty(idOrIds, 'isDisliked', forceState);
   };
 
   const handleTogglePin = (idOrIds: string | string[], forceState?: boolean) => {
-    setSongs(prev => {
-      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-      const targetIds = new Set<string>();
-      
-      ids.forEach(id => {
-        if (id.includes('|')) {
-          const groupSongs = prev.filter(s => getSongGroupKey(s) === id);
-          const targetId = groupFavorites[id] || groupSongs[0]?.id;
-          if (targetId) targetIds.add(targetId);
-        } else {
-          targetIds.add(id);
-        }
-      });
-
-      return prev.map(song => {
-        if (targetIds.has(song.id)) {
-          const isPinned = forceState !== undefined ? forceState : !song.isPinned;
-          return { ...song, isPinned };
-        }
-        return song;
-      });
-    });
+    toggleSongProperty(idOrIds, 'isPinned', forceState);
   };
 
   return (

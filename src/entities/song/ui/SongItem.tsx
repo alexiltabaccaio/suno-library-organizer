@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, ChevronLeft, Layers, Star, Filter, EyeOff } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, ChevronLeft, Layers, Star, Filter, EyeOff, Plus } from 'lucide-react';
 import { SongContextMenu } from '../../../widgets/workspace/ui/SongContextMenu';
 import { useLibrary } from '../../../features/library/model/LibraryContext';
 import { useUI } from '../../../features/ui/model/UIContext';
@@ -9,6 +9,7 @@ interface SongItemProps {
   id: string; // Added id to props
   title: string;
   styles: string;
+  lyrics: string;
   duration: string;
   version: string;
   coverColor: string;
@@ -33,6 +34,7 @@ interface SongItemProps {
   subPage?: number;
   totalSubPages?: number;
   onSubPageChange?: (page: number) => void;
+  onQuickGenerate?: (e: React.MouseEvent) => void;
 }
 
 const formatRelativeTime = (date?: Date) => {
@@ -51,15 +53,15 @@ const formatRelativeTime = (date?: Date) => {
 };
 
 export const SongItem: React.FC<SongItemProps> = ({ 
-  id, title, styles, duration, version, coverColor, notes, isRenamed, takeNumber, isChecked: isCheckedProp, onClick, onCheck, onRename,
+  id, title, styles, lyrics, duration, version, coverColor, notes, isRenamed, takeNumber, isChecked: isCheckedProp, onClick, onCheck, onRename,
   isGroupHeader, groupCount, isExpanded, onToggleExpand, isChild, isFavorite, onSetFavorite,
   isLiked, isDisliked, isPinned, createdAt,
-  subPage = 1, totalSubPages = 1, onSubPageChange
+  subPage = 1, totalSubPages = 1, onSubPageChange, onQuickGenerate
 }) => {
   const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds, subFilters, toggleSubFilter } = useUI();
+  const { checkedSongIds, selectedItemId, subFilters, toggleSubFilter } = useUI();
 
-  const isSelected = checkedSongIds.has(id);
+  const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(notes || title);
@@ -200,21 +202,37 @@ export const SongItem: React.FC<SongItemProps> = ({
     <>
       <div 
         onClick={(e) => {
-          onClick?.(e);
-          // Only toggle expansion if no modifier keys are pressed
-          if (isGroupHeader && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+          e.stopPropagation();
+          // If it's a group header and already selected, toggle expansion
+          // Otherwise, perform the normal selection click
+          if (isGroupHeader && isSelected && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
             onToggleExpand?.(e);
+          } else {
+            onClick?.(e);
           }
         }}
         onContextMenu={handleContextMenu}
-        className={`relative flex items-center gap-4 p-2 rounded-xl group cursor-pointer transition-colors ${
+        className={`relative flex items-center gap-4 p-2 rounded-xl group cursor-pointer ${
           isSelected ? 'bg-zinc-800/80' : 'hover:bg-zinc-900/40'
         } ${isChild ? 'py-1.5' : ''}`}
       >
         {/* Left Column: Selection & Favorite */}
         <div className="relative flex items-center justify-center shrink-0 w-3 h-10">
+          {isGroupHeader && (
+            <div className="absolute -top-4 flex items-center justify-center w-full">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleExpand?.(e);
+                }}
+                className="p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${!isExpanded ? '-rotate-90' : ''}`} />
+              </button>
+            </div>
+          )}
           {isChild && (
-            <div className={`absolute -top-3 flex items-center transition-all duration-300 ease-out overflow-hidden ${isFavorite || isSelected ? 'h-4 opacity-100' : 'h-0 opacity-0 lg:group-hover:h-4 lg:group-hover:opacity-100'}`}>
+            <div className={`absolute -top-3 flex items-center overflow-hidden ${isFavorite || isSelected ? 'h-4 opacity-100' : 'h-0 opacity-0 lg:group-hover:h-4 lg:group-hover:opacity-100'}`}>
               <button 
                 onClick={(e) => { e.stopPropagation(); onSetFavorite?.(e); }}
                 className={`p-0.5 transition-colors ${isFavorite ? 'text-yellow-500' : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -230,7 +248,7 @@ export const SongItem: React.FC<SongItemProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`w-3 h-3 rounded-[2px] border transition-all flex items-center justify-center ${
+            className={`w-3 h-3 rounded-[2px] border flex items-center justify-center ${
             isChecked 
               ? 'opacity-100 bg-zinc-100 border-zinc-100' 
               : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
@@ -242,7 +260,7 @@ export const SongItem: React.FC<SongItemProps> = ({
         {/* Artwork */}
         <div className={`relative ${isChild ? 'w-(--song-w-child) h-(--song-h-child)' : 'w-(--song-w) h-(--song-h) ml-[1px]'} rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>
           {/* Play Button Overlay */}
-          <div className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
             <svg viewBox="0 0 24 24" fill="currentColor" className={`text-white drop-shadow-lg ${isChild ? "w-5 h-5 ml-0.5" : "w-7 h-7 ml-0.5"}`}>
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -291,11 +309,11 @@ export const SongItem: React.FC<SongItemProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 min-w-0">
-                  <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : `text-zinc-600 text-[13px] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`) : 'text-zinc-100 text-[16px]'}`}>
+                  <h3 className={`font-bold truncate ${isChild ? (isRenamed ? 'text-zinc-100 text-[13px]' : `text-zinc-600 text-[13px] ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`) : 'text-zinc-100 text-[16px]'}`}>
                     {isChild ? (isRenamed ? notes : 'Add a note...') : title}
                   </h3>
                   <div className="flex items-center gap-1">
-                    <div className={`flex items-center transition-all duration-300 ease-out overflow-hidden ${isSelected ? (isChild ? 'w-5' : 'w-6') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
+                    <div className={`flex items-center overflow-hidden ${isSelected ? (isChild ? 'w-5' : 'w-6') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
                       <button 
                         onClick={handleStartEdit}
                         className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
@@ -436,6 +454,14 @@ export const SongItem: React.FC<SongItemProps> = ({
             )}
           </div>
           <div className="flex items-center gap-4">
+            {onQuickGenerate && (
+              <button 
+                onClick={onQuickGenerate}
+                className="text-zinc-600 hover:text-zinc-300 transition-colors"
+              >
+                <Plus className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} />
+              </button>
+            )}
             <button 
               onClick={(e) => { e.stopPropagation(); handleToggleLike(id); }}
               className={`transition-colors ${isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
@@ -449,7 +475,10 @@ export const SongItem: React.FC<SongItemProps> = ({
               <ThumbsDown className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} fill={isDisliked ? "currentColor" : "none"} />
             </button>
             <button 
-              onClick={(e) => { e.stopPropagation(); handleTogglePin(id); }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                handleTogglePin(id); 
+              }}
               className={`transition-colors ${isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
             >
               <Pin className={isChild ? "w-3.5 h-3.5" : "w-4 h-4"} fill={isPinned ? "currentColor" : "none"} />
@@ -468,7 +497,7 @@ export const SongItem: React.FC<SongItemProps> = ({
             ref={moreButtonRef}
             onClick={handleMoreClick}
             onMouseDown={(e) => e.stopPropagation()}
-            className={`p-1.5 rounded-full text-zinc-600 hover:text-zinc-300 transition-all ${showMenu ? 'bg-zinc-800 text-zinc-100' : 'bg-transparent group-hover:bg-[#19191b]'}`}
+            className={`p-1.5 rounded-full text-zinc-600 hover:text-zinc-300 ${showMenu ? 'bg-zinc-800 text-zinc-100' : 'bg-transparent group-hover:bg-[#19191b]'}`}
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>

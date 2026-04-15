@@ -26,9 +26,9 @@ export const SongCard: React.FC<SongCardProps> = ({
   onMouseEnter, onMouseLeave
 }) => {
   const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds } = useUI();
+  const { checkedSongIds, selectedItemId } = useUI();
 
-  const isSelected = checkedSongIds.has(id);
+  const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = checkedSongIds.has(id);
   const [showMenu, setShowMenu] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
@@ -96,11 +96,14 @@ export const SongCard: React.FC<SongCardProps> = ({
   return (
     <>
       <div 
-        onClick={onClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(e);
+        }}
         onContextMenu={handleContextMenu}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        className={`relative flex items-center group cursor-pointer transition-all duration-300 py-1.5 song-card ${isSelected ? 'is-selected' : ''}`}
+        className={`relative flex items-center group cursor-pointer py-1.5 song-card ${isSelected ? 'is-selected' : ''}`}
       >
         {/* Artwork Container */}
         <div className={`relative w-(--song-w-child) h-(--song-h-child) rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>
@@ -110,7 +113,7 @@ export const SongCard: React.FC<SongCardProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`absolute left-1.75 top-1/2 -translate-y-1/2 z-30 w-3 h-3 rounded-[2px] border transition-all flex items-center justify-center ${
+            className={`absolute left-[6.8px] top-1/2 -translate-y-1/2 z-30 w-3 h-3 rounded-[2px] border flex items-center justify-center ${
             isChecked 
               ? 'opacity-100 bg-zinc-100 border-zinc-100' 
               : `border-white/40 bg-black/20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`
@@ -119,7 +122,7 @@ export const SongCard: React.FC<SongCardProps> = ({
           </div>
 
           {/* Favorite Star - Top Left */}
-          <div className={`absolute left-1 top-1 z-30 flex items-center transition-all duration-300 ease-out ${isFavorite || isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
+          <div className={`absolute left-1 top-1 z-30 flex items-center ${isFavorite || isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
             <button 
               onClick={(e) => { e.stopPropagation(); onSetFavorite?.(e); }}
               className={`p-0.5 transition-colors drop-shadow-md ${isFavorite ? 'text-yellow-500' : 'text-white/70 hover:text-white'}`}
@@ -129,7 +132,7 @@ export const SongCard: React.FC<SongCardProps> = ({
           </div>
 
           {/* Play Button Overlay */}
-          <div className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
             <svg viewBox="0 0 24 24" fill="currentColor" className="text-white drop-shadow-lg w-5 h-5 ml-0.5">
               <path d="M8 5v14l11-7z" />
             </svg>
