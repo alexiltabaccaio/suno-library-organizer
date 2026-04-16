@@ -41,11 +41,13 @@ export const useSongGrouping = (songs: Song[], groupFavorites: Record<string, st
         songs: sortedGroupSongs
       };
     }).sort((a, b) => {
-      // Sort groups: 
-      // 1. We need to find the "representative" song for sorting the group.
-      // 2. If an explicit favorite is set, use it.
-      // 3. If not, use the newest song (ignoring pin status for this choice).
+      // Find the oldest record in each group to determine the group's "birth date"
+      // This ensures stability: the group stays in its original chronological position 
+      // even when new versions (takes) are generated.
+      const oldestA = [...a.songs].sort((s1, s2) => s1.createdAt.getTime() - s2.createdAt.getTime())[0];
+      const oldestB = [...b.songs].sort((s1, s2) => s1.createdAt.getTime() - s2.createdAt.getTime())[0];
       
+      // For pinned status, we still look at the "favorite" (representative) song.
       const newestA = [...a.songs].sort((s1, s2) => s2.createdAt.getTime() - s1.createdAt.getTime())[0];
       const favIdA = groupFavorites[a.key] || newestA.id;
       const favSongA = a.songs.find(s => s.id === favIdA) || newestA;
@@ -54,12 +56,12 @@ export const useSongGrouping = (songs: Song[], groupFavorites: Record<string, st
       const favIdB = groupFavorites[b.key] || newestB.id;
       const favSongB = b.songs.find(s => s.id === favIdB) || newestB;
 
-      // Only move the group to top if its representative (favorite or newest) is pinned
+      // Priority 1: Pinned groups first
       if (favSongA.isPinned && !favSongB.isPinned) return -1;
       if (!favSongA.isPinned && favSongB.isPinned) return 1;
       
-      // Fallback to the date of the representative song
-      return favSongB.createdAt.getTime() - favSongA.createdAt.getTime();
+      // Priority 2: Stability based on the date of the first generation (Oldest)
+      return oldestB.createdAt.getTime() - oldestA.createdAt.getTime();
     });
   }, [sortedSongs, groupFavorites]);
 

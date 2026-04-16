@@ -52,12 +52,33 @@ export const LibraryProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const handleDelete = (itemIds: string[]) => {
     setSongs(prev => {
-      return prev.filter(song => {
+      const nextSongs = prev.filter(song => {
         if (itemIds.includes(song.id)) return false;
         const groupKey = getSongGroupKey(song);
         if (itemIds.includes(groupKey)) return false;
         return true;
       });
+
+      // Cleanup favorites for groups that now have only 1 or 0 songs
+      setGroupFavorites(prevFavs => {
+        const nextFavs = { ...prevFavs };
+        const groupCounts: Record<string, number> = {};
+        
+        nextSongs.forEach(s => {
+          const key = getSongGroupKey(s);
+          groupCounts[key] = (groupCounts[key] || 0) + 1;
+        });
+
+        Object.keys(nextFavs).forEach(key => {
+          if (!groupCounts[key] || groupCounts[key] <= 1) {
+            delete nextFavs[key];
+          }
+        });
+
+        return nextFavs;
+      });
+
+      return nextSongs;
     });
   };
 

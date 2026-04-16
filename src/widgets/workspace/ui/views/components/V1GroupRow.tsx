@@ -75,7 +75,7 @@ export const V1GroupRow: React.FC<V1GroupRowProps> = ({
       {isExpanded && (
         <div className="pl-8 relative mt-1">
           <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-[260px] overflow-y-auto pr-2 custom-scrollbar">
             {paginatedSubSongs.map((song) => (
               <SongItem 
                 key={song.id}
