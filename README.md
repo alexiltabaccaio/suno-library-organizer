@@ -1,6 +1,6 @@
 # 🎵 Suno Library Organizer: A UX Proposal for High-Volume Generation Management
 
-<img src="https://github.com/user-attachments/assets/616f8517-1625-45c5-8122-989f049e57e4" alt="Suno Library Organizer Interface Preview" width="400">
+<img width="3825" height="1812" alt="Suno Library Organizer Preview" src="https://github.com/user-attachments/assets/aade5b15-2db3-4e71-840e-9b0054c1dee8" />
 
 👉 **[Try the Live Demo Here](https://suno-library-organizer.vercel.app/)**
 
