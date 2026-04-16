@@ -16,6 +16,10 @@ export const useWorkspaceFilters = (
   groupFavorites: Record<string, string>
 ) => {
   const filteredGroupedSongs = useMemo(() => {
+    const hasMainFilters = Object.values(filters).some(Boolean);
+
+    if (!hasMainFilters) return groupedSongs;
+
     return groupedSongs.filter(group => {
       const favoriteId = groupFavorites[group.key] || group.songs[0].id;
       const favoriteSong = group.songs.find(s => s.id === favoriteId) || group.songs[0];
@@ -27,20 +31,9 @@ export const useWorkspaceFilters = (
         (!filters.hideDisliked || !favoriteSong.isDisliked)
       );
 
-      if (matchesMain) return true;
-
-      // Check if any song in the group matches sub-filters
-      const matchesSub = group.songs.some(s => {
-        return (
-          (!subFilters.liked || s.isLiked) &&
-          (!subFilters.disliked || s.isDisliked) &&
-          (!subFilters.hideDisliked || !s.isDisliked)
-        );
-      });
-
-      return matchesSub;
+      return matchesMain;
     });
-  }, [groupedSongs, filters, subFilters, groupFavorites]);
+  }, [groupedSongs, filters, groupFavorites]);
 
   const filteredSortedSongs = useMemo(() => {
     return sortedSongs.filter(song => {

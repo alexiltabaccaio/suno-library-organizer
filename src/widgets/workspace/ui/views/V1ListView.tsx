@@ -20,7 +20,7 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
   expandedGroups,
   toggleGroup
 }) => {
-  const { toggleCheck, handleSelectItem } = useUI();
+  const { toggleCheck, handleSelectItem, handleQuickGenerate } = useUI();
   const { handleRenameSong } = useLibrary();
 
   return (
@@ -51,6 +51,10 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
                 }
               }}
               onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
+              onQuickGenerate={(e) => {
+                e.stopPropagation();
+                handleQuickGenerate(song);
+              }}
             />
           );
         }

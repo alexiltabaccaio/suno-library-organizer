@@ -21,7 +21,7 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
   expandedGroups,
   toggleGroup
 }) => {
-  const { toggleCheck, handleSelectItem, checkedSongIds } = useUI();
+  const { toggleCheck, handleSelectItem, checkedSongIds, handleQuickGenerate } = useUI();
   const { handleRenameSong } = useLibrary();
   const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
   const [hoveredActionsGroupKey, setHoveredActionsGroupKey] = useState<string | null>(null);
@@ -53,6 +53,10 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
                 onCheck={() => toggleCheck(song.id)}
                 onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
                 onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
+                onQuickGenerate={(e) => {
+                  e.stopPropagation();
+                  handleQuickGenerate(song);
+                }}
               />
             );
           }
