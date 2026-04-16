@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Pin, Trash2, X } from 'lucide-react';
 import { Song } from '../../../../../entities/song/model/types';
 
 interface GroupActionPanelProps {
@@ -15,6 +15,8 @@ interface GroupActionPanelProps {
   onToggleLike: (ids: string[], val: boolean) => void;
   onToggleDislike: (ids: string[], val: boolean) => void;
   onTogglePin: (ids: string[], val: boolean) => void;
+  onDelete?: (ids: string[]) => void;
+  onClearSelection?: () => void;
 }
 
 export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
@@ -29,7 +31,9 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
   onHoverActions,
   onToggleLike,
   onToggleDislike,
-  onTogglePin
+  onTogglePin,
+  onDelete,
+  onClearSelection
 }) => {
   const hasChecked = paginatedSubSongs.some(s => checkedSongIds.has(s.id));
   const isHovered = paginatedSubSongs.some(s => s.id === hoveredSongId) || hoveredActionsGroupKey === groupKey;
@@ -68,10 +72,36 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
     <div 
       onMouseEnter={() => onHoverActions(groupKey)}
       onMouseLeave={() => onHoverActions(null)}
-      className={`flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
+      className={`relative flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
+      {/* New Column: Bulk Actions (Trash & X) */}
+      <div className={`absolute -left-7 top-2 flex flex-col items-center gap-3 transition-opacity duration-200 ${hasChecked ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (selectedInRow.length > 0) {
+              onDelete?.(selectedInRow.map(s => s.id));
+            }
+          }}
+          className="text-zinc-600 hover:text-red-400 transition-colors"
+          title="Delete selected sub-cards"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onClearSelection?.();
+          }}
+          className="text-zinc-600 hover:text-zinc-300 transition-colors"
+          title="Cancel selection"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       <button 
         onClick={(e) => { 
           e.stopPropagation(); 

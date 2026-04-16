@@ -11,8 +11,8 @@ export const useGroupRowLogic = (group: SongGroup, groupFavoriteId?: string) => 
   }, [group.songs, groupFavoriteId]);
 
   const allGroupSongsChecked = useMemo(() => {
-    return group.songs.every(s => checkedSongIds.has(s.id));
-  }, [group.songs, checkedSongIds]);
+    return checkedSongIds.has(group.key) || (group.songs.length > 0 && group.songs.every(s => checkedSongIds.has(s.id)));
+  }, [group.songs, group.key, checkedSongIds]);
 
   const filteredSubSongs = useMemo(() => {
     return group.songs.filter(s => {

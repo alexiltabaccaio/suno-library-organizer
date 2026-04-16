@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { SongItem } from '../../../../entities/song/ui/SongItem';
 import { SongGroup } from '../../../../features/library/hooks/useSongGrouping';
 import { V2GroupRow } from './components/V2GroupRow';
 import { useUI } from '../../../../features/ui/model/UIContext';
 import { useLibrary } from '../../../../features/library/model/LibraryContext';
+import { DragSelect } from './components/DragSelect';
 
 interface V2GridViewProps {
   groupedSongs: SongGroup[];
@@ -20,54 +21,60 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
   expandedGroups,
   toggleGroup
 }) => {
-  const { toggleCheck, handleSelectItem } = useUI();
+  const { toggleCheck, handleSelectItem, checkedSongIds } = useUI();
   const { handleRenameSong } = useLibrary();
   const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
   const [hoveredActionsGroupKey, setHoveredActionsGroupKey] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="space-y-1">
-      {groupedSongs.map(group => {
-        if (group.songs.length === 1) {
-          const song = group.songs[0];
+    <DragSelect 
+      containerRef={containerRef}
+    >
+      <div className="space-y-1 flex-1">
+        {groupedSongs.map(group => {
+          if (group.songs.length === 1) {
+            const song = group.songs[0];
+            return (
+              <SongItem 
+                key={song.id}
+                id={song.id}
+                title={song.title}
+                styles={song.styles}
+                lyrics={song.lyrics}
+                duration={song.duration}
+                version={song.version}
+                coverColor={song.coverColor}
+                isLiked={song.isLiked}
+                isDisliked={song.isDisliked}
+                isPinned={song.isPinned}
+                takeNumber={songsWithTakeNumbers.get(song.id)}
+                isChecked={checkedSongIds.has(song.id)}
+                onCheck={() => toggleCheck(song.id)}
+                onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
+                onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
+              />
+            );
+          }
+
+          const isExpanded = expandedGroups.has(group.key);
+
           return (
-            <SongItem 
-              key={song.id}
-              id={song.id}
-              title={song.title}
-              styles={song.styles}
-              lyrics={song.lyrics}
-              duration={song.duration}
-              version={song.version}
-              coverColor={song.coverColor}
-              isLiked={song.isLiked}
-              isDisliked={song.isDisliked}
-              isPinned={song.isPinned}
-              takeNumber={songsWithTakeNumbers.get(song.id)}
-              onCheck={() => toggleCheck(song.id)}
-              onClick={(e) => handleSelectItem(song.id, song.id, e.shiftKey, e.ctrlKey || e.metaKey, visibleIds)}
-              onRename={(newTitle) => handleRenameSong(song.id, newTitle, true)}
+            <V2GroupRow 
+              key={group.key}
+              group={group}
+              songsWithTakeNumbers={songsWithTakeNumbers}
+              visibleIds={visibleIds}
+              isExpanded={isExpanded}
+              toggleGroup={toggleGroup}
+              hoveredSongId={hoveredSongId}
+              setHoveredSongId={setHoveredSongId}
+              hoveredActionsGroupKey={hoveredActionsGroupKey}
+              setHoveredActionsGroupKey={setHoveredActionsGroupKey}
             />
           );
-        }
-
-        const isExpanded = expandedGroups.has(group.key);
-
-        return (
-          <V2GroupRow 
-            key={group.key}
-            group={group}
-            songsWithTakeNumbers={songsWithTakeNumbers}
-            visibleIds={visibleIds}
-            isExpanded={isExpanded}
-            toggleGroup={toggleGroup}
-            hoveredSongId={hoveredSongId}
-            setHoveredSongId={setHoveredSongId}
-            hoveredActionsGroupKey={hoveredActionsGroupKey}
-            setHoveredActionsGroupKey={setHoveredActionsGroupKey}
-          />
-        );
-      })}
-    </div>
+        })}
+      </div>
+    </DragSelect>
   );
 };

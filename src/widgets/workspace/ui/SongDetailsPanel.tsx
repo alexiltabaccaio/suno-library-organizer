@@ -1,8 +1,10 @@
 import React from 'react';
-import { X, Play, ThumbsUp, MessageSquare, Share, Music, Copy } from 'lucide-react';
+import { X, Play, ThumbsUp, MessageSquare, Share, Music, Copy, ThumbsDown } from 'lucide-react';
 import { Song } from '../../../entities/song/model/types';
 import { TagBackdrop } from '../../../entities/song/ui/TagBackdrop';
 import { useEditor } from '../../../features/editor/model/EditorContext';
+import { useLibrary } from '../../../features/library/model/LibraryContext';
+import { useUI } from '../../../features/ui/model/UIContext';
 
 interface SongDetailsPanelProps {
   song: Song;
@@ -14,6 +16,11 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
   onClose 
 }) => {
   const { formattingMode } = useEditor();
+  const { handleToggleLike, handleToggleDislike } = useLibrary();
+  const { viewMode } = useUI();
+
+  const likeCount = Math.max(0, (song.isLiked ? 1 : 0) - (song.isDisliked ? 1 : 0));
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -42,10 +49,25 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
             <Play className="w-4 h-4 fill-current" />
             <span className="text-sm font-medium">0</span>
           </button>
-          <button className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
-            <ThumbsUp className="w-4 h-4" />
-            <span className="text-sm font-medium">0</span>
-          </button>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => handleToggleLike(song.id)}
+              className={`flex items-center gap-2 transition-colors ${song.isLiked ? 'text-zinc-100' : 'text-zinc-300 hover:text-white'}`}
+            >
+              <ThumbsUp className={`w-4 h-4 ${song.isLiked ? 'fill-current' : ''}`} />
+            </button>
+            <span className="text-sm font-medium text-zinc-300 w-4 text-center">
+              {likeCount}
+            </span>
+            <button 
+              onClick={() => handleToggleDislike(song.id)}
+              className={`flex items-center gap-2 transition-colors ${song.isDisliked ? 'text-zinc-100' : 'text-zinc-300 hover:text-white'}`}
+            >
+              <ThumbsDown className={`w-4 h-4 ${song.isDisliked ? 'fill-current' : ''}`} />
+            </button>
+          </div>
+
           <button className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors">
             <MessageSquare className="w-4 h-4" />
             <span className="text-sm font-medium">0</span>
@@ -57,7 +79,12 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
 
         {/* Title & Caption */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-zinc-100 mb-1">{song.title}</h2>
+          <h2 className="text-xl font-bold text-zinc-100 mb-0.5">{song.title}</h2>
+          {song.takeNumber && viewMode !== 'before' && (
+            <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
+              Take {song.takeNumber}
+            </p>
+          )}
           <p className="text-sm text-zinc-500">Add a Caption</p>
         </div>
 

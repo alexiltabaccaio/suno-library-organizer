@@ -31,8 +31,8 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
   hoveredActionsGroupKey,
   setHoveredActionsGroupKey
 }) => {
-  const { handleToggleLike, handleToggleDislike, handleTogglePin, groupFavorites, handleRenameSong, handleSetFavorite } = useLibrary();
-  const { checkedSongIds, selectedSongId, selectedItemId, handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem } = useUI();
+  const { handleToggleLike, handleToggleDislike, handleTogglePin, groupFavorites, handleRenameSong, handleSetFavorite, handleDelete } = useLibrary();
+  const { checkedSongIds, selectedSongId, selectedItemId, handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem, clearCheckedSongs } = useUI();
   
   const groupFavoriteId = groupFavorites[group.key];
   const { 
@@ -100,6 +100,8 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
             onToggleLike={handleToggleLike}
             onToggleDislike={handleToggleDislike}
             onTogglePin={handleTogglePin}
+            onDelete={handleDelete}
+            onClearSelection={clearCheckedSongs}
           />
 
           <div className="flex-1 min-w-0">

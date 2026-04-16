@@ -93,17 +93,17 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
               filterRef={filterRef}
             />
 
-            <button className="flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full text-zinc-300">
+            <button className="flex items-center gap-1.5 bg-[#19191b] px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full text-zinc-500 opacity-40 grayscale pointer-events-none cursor-default">
               <ListFilter className="w-4 h-4 md:w-3.5 md:h-3.5" />
               <span className="hidden md:inline">Newest</span>
               <ChevronDown className="w-3.5 h-3.5 ml-0.5 text-zinc-500" />
             </button>
           </div>
 
-          <div className="hidden md:flex items-center bg-[#19191b] rounded-full p-0.5 h-10">
-            <button className="px-3 py-1 text-zinc-400 hover:text-zinc-200">Liked</button>
-            <button className="px-3 py-1 text-zinc-400 hover:text-zinc-200">Public</button>
-            <button className="px-3 py-1 text-zinc-400 hover:text-zinc-200">Uploads</button>
+          <div className="hidden md:flex items-center bg-[#19191b] rounded-full p-0.5 h-10 opacity-40 grayscale pointer-events-none cursor-default">
+            <button className="px-3 py-1 text-zinc-500">Liked</button>
+            <button className="px-3 py-1 text-zinc-500">Public</button>
+            <button className="px-3 py-1 text-zinc-500">Uploads</button>
           </div>
 
           <div className="flex items-center gap-1 bg-[#19191b] rounded-full px-2 h-10">
@@ -132,21 +132,25 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
       <div 
         className="flex-1 overflow-y-auto px-4 py-4 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        <div className="space-y-1 relative pl-0">
+        <div className="relative pl-0 min-h-full flex flex-col">
           {viewMode === 'before' ? (
-            <BeforeView 
-              songs={paginatedData.items as Song[]}
-              songsWithTakeNumbers={songsWithTakeNumbers}
-              visibleIds={visibleIds}
-            />
+            <div className="space-y-1">
+              <BeforeView 
+                songs={paginatedData.items as Song[]}
+                songsWithTakeNumbers={songsWithTakeNumbers}
+                visibleIds={visibleIds}
+              />
+            </div>
           ) : viewMode === 'v1' ? (
-            <V1ListView 
-              groupedSongs={paginatedData.items as any[]}
-              songsWithTakeNumbers={songsWithTakeNumbers}
-              visibleIds={visibleIds}
-              expandedGroups={expandedGroups}
-              toggleGroup={toggleGroup}
-            />
+            <div className="space-y-1">
+              <V1ListView 
+                groupedSongs={paginatedData.items as any[]}
+                songsWithTakeNumbers={songsWithTakeNumbers}
+                visibleIds={visibleIds}
+                expandedGroups={expandedGroups}
+                toggleGroup={toggleGroup}
+              />
+            </div>
           ) : (
             <V2GridView 
               groupedSongs={paginatedData.items as any[]}

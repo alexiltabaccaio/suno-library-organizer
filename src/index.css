@@ -1,10 +1,26 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --song-h: 82px;
   --song-w: 64px;
   --song-h-child: 70px;
   --song-w-child: 54px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --song-h: 72px;
+    --song-w: 56px;
+    --song-h-child: 62px;
+    --song-w-child: 48px;
+  }
+}
+
+@theme {
+  --song-h: var(--song-h);
+  --song-w: var(--song-w);
+  --song-h-child: var(--song-h-child);
+  --song-w-child: var(--song-w-child);
 }
 
 @layer utilities {
