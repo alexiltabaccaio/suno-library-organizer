@@ -12,12 +12,15 @@ interface SongDetailsPanelProps {
 }
 
 export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({ 
-  song, 
+  song: initialSong, 
   onClose 
 }) => {
   const { formattingMode } = useEditorStore();
-  const { handleToggleLike, handleToggleDislike, handleRenameSong } = useLibraryStore();
+  const { songs, handleToggleLike, handleToggleDislike, handleRenameSong } = useLibraryStore();
   const { viewMode } = useUIStore();
+
+  // Always use the freshest version of the song from the store
+  const song = songs.find(s => s.id === initialSong.id) || initialSong;
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitleValue, setEditTitleValue] = useState('');
