@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Library, RefreshCw, Wand2, Trash2 } from 'lucide-react';
 import { FormattedTextarea } from './FormattedTextarea';
-import { SAMPLE_STYLES, STYLE_TAGS } from '../../../shared/lib/constants';
+import { SAMPLE_STYLES, STYLE_TAGS } from '@/shared/lib/constants';
 
 interface StylesEditorProps {
   styles: string;

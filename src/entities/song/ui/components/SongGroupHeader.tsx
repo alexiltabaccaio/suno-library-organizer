@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, ChevronLeft, Layers, Plus } from 'lucide-react';
-import { SongContextMenu } from '../../../../widgets/workspace/ui/SongContextMenu';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
-import { useUI } from '../../../../features/ui/model/UIContext';
+import { SongContextMenu } from '@/widgets/workspace/ui/SongContextMenu';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
 import { SongItemProps } from '../types';
 import { useSongItemMenu } from '../hooks/useSongItemMenu';
 import { useSongItemEdit } from '../hooks/useSongItemEdit';
@@ -14,8 +14,8 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
   isLiked, isDisliked, isPinned,
   subPage = 1, totalSubPages = 1, onSubPageChange, onQuickGenerate
 }) => {
-  const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds, selectedItemId } = useUI();
+  const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibraryStore();
+  const { checkedSongIds, selectedItemId } = useUIStore();
 
   const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);

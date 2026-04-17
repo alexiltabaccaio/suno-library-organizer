@@ -13,8 +13,9 @@ export const STRUCTURE_TAGS = [
 ];
 
 export const INSTRUMENT_TAGS = [
-  'Guitar', 'Piano', 'Synthesizer', 
-  'Drum', 'Bass', 'String', 'Horn', 'Sax', 'Trumpet'
+  'Guitar', 'Guitarist', 'Piano', 'Pianist', 'Synthesizer', 'Synth',
+  'Drum', 'Drums', 'Drummer', 'Bass', 'Bassist', 'String', 'Strings', 
+  'Horn', 'Horns', 'Sax', 'Saxophone', 'Trumpet'
 ];
 
 export const isStructureTag = (tag: string) => {

@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
-import { useUI } from '../../../../features/ui/model/UIContext';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
 
 export const useSongItemMenu = (id: string, isGroupHeader?: boolean) => {
-  const { handleDelete, groupFavorites, songs, handleSetFavorite } = useLibrary();
-  const { checkedSongIds } = useUI();
+  const { handleDelete, groupFavorites, songs, handleSetFavorite } = useLibraryStore();
+  const { checkedSongIds } = useUIStore();
   
   const [showMenu, setShowMenu] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
@@ -87,12 +87,23 @@ export const useSongItemMenu = (id: string, isGroupHeader?: boolean) => {
   };
 
   const canExcludeFavorite = () => {
-    if (isGroupHeader && !!groupFavorites[id]) return true;
+    if (isGroupHeader) {
+      const groupKey = id;
+      const groupSongs = songs.filter(s => `${s.title}|${s.styles}|${s.lyrics}` === groupKey);
+      return groupSongs.length > 1 && !!groupFavorites[groupKey];
+    }
+
     if (!checkedSongIds.has(id)) return false;
     const selection = Array.from(checkedSongIds) as string[];
     const favoriteIds = new Set(Object.values(groupFavorites));
+    
     if (selection.length > 1) {
-      return selection.some(itemId => favoriteIds.has(itemId) || (itemId.includes('|') && !!groupFavorites[itemId]));
+      // Show only if there is at least one non-favorite song to delete
+      return selection.some(itemId => {
+        if (favoriteIds.has(itemId)) return false;
+        if (itemId.includes('|')) return false; // It's a group
+        return true;
+      });
     }
     return false;
   };

@@ -1,8 +1,8 @@
 import React from 'react';
-import { SongItem } from '../../../../entities/song/ui/SongItem';
-import { Song } from '../../../../entities/song/model/types';
-import { useUI } from '../../../../features/ui/model/UIContext';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
+import { SongItem } from '@/entities/song/ui/SongItem';
+import { Song } from '@/entities/song/model/types';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
 
 interface BeforeViewProps {
   songs: Song[];
@@ -15,8 +15,8 @@ export const BeforeView: React.FC<BeforeViewProps> = ({
   songsWithTakeNumbers,
   visibleIds,
 }) => {
-  const { toggleCheck, handleSelectItem } = useUI();
-  const { handleRenameSong } = useLibrary();
+  const { toggleCheck, handleSelectItem } = useUIStore();
+  const { handleRenameSong } = useLibraryStore();
 
   return (
     <>

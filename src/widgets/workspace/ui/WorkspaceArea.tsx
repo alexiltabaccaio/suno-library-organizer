@@ -1,28 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ChevronRight, Pencil, Search, ChevronDown, ChevronLeft, ListFilter, Sparkles, Type, Highlighter, Palette } from 'lucide-react';
-import { useLibrary } from '../../../features/library/model/LibraryContext';
-import { useUI } from '../../../features/ui/model/UIContext';
-import { useEditor } from '../../../features/editor/model/EditorContext';
-import { Song } from '../../../entities/song/model/types';
-import { useSongGrouping } from '../../../features/library/hooks/useSongGrouping';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useEditorStore } from '@/app/store/useEditorStore';
+import { Song } from '@/entities/song/model/types';
+import { useSongGrouping } from '@/features/library/hooks/useSongGrouping';
 import { BeforeView } from './views/BeforeView';
 import { V1ListView } from './views/V1ListView';
 import { V2GridView } from './views/V2GridView';
 import { FilterDropdown } from './components/FilterDropdown';
-import { useWorkspaceFilters } from '../hooks/useWorkspaceFilters';
-import { useWorkspacePagination } from '../hooks/useWorkspacePagination';
-import { useGroupExpansion } from '../hooks/useGroupExpansion';
-import { useVisibleIds } from '../hooks/useVisibleIds';
+import { useWorkspaceFilters } from '@/widgets/workspace/hooks/useWorkspaceFilters';
+import { useWorkspacePagination } from '@/widgets/workspace/hooks/useWorkspacePagination';
+import { useVisibleIds } from '@/widgets/workspace/hooks/useVisibleIds';
 
 interface WorkspaceAreaProps {
   hideFooter?: boolean;
 }
 
 export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false }) => {
-  const { songs, groupFavorites } = useLibrary();
-  const { viewMode, setViewMode, filters, toggleFilter, subFilters, selectedSong, clearItemSelection } = useUI();
-  const { formattingMode, setFormattingMode } = useEditor();
+  const { songs, groupFavorites } = useLibraryStore();
+  const { 
+    viewMode, setViewMode, filters, toggleFilter, subFilters, 
+    clearItemSelection, expandedGroups, toggleGroup, selectedSong: getSelectedSong 
+  } = useUIStore();
+  const selectedSong = getSelectedSong();
+  const { formattingMode, setFormattingMode } = useEditorStore();
 
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -30,7 +33,6 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
 
   // Hooks for logic extraction
   const { sortedSongs, groupedSongs, songsWithTakeNumbers } = useSongGrouping(songs, groupFavorites);
-  const { expandedGroups, toggleGroup } = useGroupExpansion();
   const { filteredGroupedSongs, filteredSortedSongs } = useWorkspaceFilters(groupedSongs, sortedSongs, filters, subFilters, groupFavorites);
   const { currentPage, setCurrentPage, paginatedData } = useWorkspacePagination(viewMode, filteredSortedSongs, filteredGroupedSongs, ITEMS_PER_PAGE);
   const visibleIds = useVisibleIds(viewMode, paginatedData.items, expandedGroups, subFilters);

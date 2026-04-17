@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Check, Star, ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
-import { SongContextMenu } from '../../../widgets/workspace/ui/SongContextMenu';
-import { useLibrary } from '../../../features/library/model/LibraryContext';
-import { useUI } from '../../../features/ui/model/UIContext';
+import { SongContextMenu } from '@/widgets/workspace/ui/SongContextMenu';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
 
 interface SongCardProps {
   id: string;
@@ -25,8 +25,8 @@ export const SongCard: React.FC<SongCardProps> = ({
   isFavorite, onSetFavorite, isLiked, isDisliked, isPinned, takeNumber,
   onMouseEnter, onMouseLeave
 }) => {
-  const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds, selectedItemId } = useUI();
+  const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibraryStore();
+  const { checkedSongIds, selectedItemId } = useUIStore();
 
   const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = checkedSongIds.has(id);
@@ -86,7 +86,12 @@ export const SongCard: React.FC<SongCardProps> = ({
     const favoriteIds = new Set(Object.values(groupFavorites));
     
     if (selection.length > 1) {
-      return selection.some(itemId => favoriteIds.has(itemId) || itemId.includes('|'));
+      // Show only if there is at least one non-favorite song to delete
+      return selection.some(itemId => {
+        if (favoriteIds.has(itemId)) return false;
+        if (itemId.includes('|')) return false; // It's a group
+        return true;
+      });
     }
     
     const singleId = selection[0];

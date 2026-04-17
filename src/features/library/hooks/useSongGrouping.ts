@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Song } from '../../../entities/song/model/types';
-import { getSongGroupKey } from '../../../entities/song/lib/songUtils';
+import { Song } from '@/entities/song/model/types';
+import { getSongGroupKey } from '@/entities/song/lib/songUtils';
 
 export interface SongGroup {
   key: string;

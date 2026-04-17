@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ActionButtons } from './ActionButtons';
 import { LyricsEditor } from './LyricsEditor';
 import { StylesEditor } from './StylesEditor';
 import { SongMetadata } from './SongMetadata';
-import { useEditor } from '../../../features/editor/model/EditorContext';
-import { useSmartInsert } from '../../../features/editor/hooks/useSmartInsert';
+import { useEditorStore } from '@/app/store/useEditorStore';
+import { useSmartInsert } from '@/features/editor/hooks/useSmartInsert';
+import { FormattedTextareaRef } from './FormattedTextarea';
 
 interface EditorPanelProps {
   isMobile?: boolean;
@@ -12,7 +13,7 @@ interface EditorPanelProps {
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({ isMobile }) => {
   const { 
-    lyrics, setLyrics, lyricsRef, 
+    lyrics, setLyrics, 
     isLyricsExpanded, setIsLyricsExpanded,
     isLyricsCollapsed, setIsLyricsCollapsed,
     isStylesCollapsed, setIsStylesCollapsed,
@@ -20,8 +21,17 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ isMobile }) => {
     showInfo, setShowInfo,
     styles, setStyles,
     title, setTitle,
-    handleGenerateSong
-  } = useEditor();
+    handleGenerateSong: storeGenerateSong
+  } = useEditorStore();
+
+  const lyricsRef = useRef<FormattedTextareaRef>(null);
+
+  const handleGenerateSong = () => {
+    storeGenerateSong();
+    if (lyricsRef.current) {
+      lyricsRef.current.setCursorPos(0);
+    }
+  };
 
   const handleSmartInsert = useSmartInsert(lyrics, setLyrics, lyricsRef);
 

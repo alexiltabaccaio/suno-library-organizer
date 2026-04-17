@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Song } from '../../../entities/song/model/types';
-import { SongGroup } from '../../../features/library/hooks/useSongGrouping';
+import { Song } from '@/entities/song/model/types';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 
 interface Filters {
   liked: boolean;

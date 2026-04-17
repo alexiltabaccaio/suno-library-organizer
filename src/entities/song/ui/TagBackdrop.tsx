@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { isStructureTag, isInstrumentTag } from '../../../features/editor/lib/tagUtils';
+import { isStructureTag, isInstrumentTag } from '@/features/editor/lib/tagUtils';
 
 interface TagBackdropProps {
   value: string;

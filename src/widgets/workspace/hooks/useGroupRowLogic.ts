@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { useUI } from '../../../features/ui/model/UIContext';
-import { SongGroup } from '../../../features/library/hooks/useSongGrouping';
+import { useUIStore } from '@/app/store/useUIStore';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 
 export const useGroupRowLogic = (group: SongGroup, groupFavoriteId?: string) => {
-  const { subFilters, groupPages, setGroupPage, checkedSongIds } = useUI();
+  const { subFilters, groupPages, setGroupPage, checkedSongIds } = useUIStore();
   const SUB_ITEMS_PER_PAGE = 15;
 
   const favoriteSong = useMemo(() => {

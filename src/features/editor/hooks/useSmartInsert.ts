@@ -1,6 +1,6 @@
 import { RefObject, useCallback } from 'react';
 import { getSuggestedNextTag, isStructureTag } from '../lib/tagUtils';
-import { FormattedTextareaRef } from '../../../widgets/editor/ui/FormattedTextarea';
+import { FormattedTextareaRef } from '@/widgets/editor/ui/FormattedTextarea';
 
 export function useSmartInsert(
   value: string,

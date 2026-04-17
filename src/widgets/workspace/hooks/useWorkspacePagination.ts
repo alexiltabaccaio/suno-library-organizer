@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Song } from '../../../entities/song/model/types';
-import { SongGroup } from '../../../features/library/hooks/useSongGrouping';
+import { Song } from '@/entities/song/model/types';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 
 export const useWorkspacePagination = (
   viewMode: string,

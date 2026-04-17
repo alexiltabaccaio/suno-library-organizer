@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { SongItem } from '../../../../entities/song/ui/SongItem';
-import { SongGroup } from '../../../../features/library/hooks/useSongGrouping';
+import { SongItem } from '@/entities/song/ui/SongItem';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 import { V2GroupRow } from './components/V2GroupRow';
-import { useUI } from '../../../../features/ui/model/UIContext';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
 import { DragSelect } from './components/DragSelect';
 
 interface V2GridViewProps {
@@ -21,8 +21,8 @@ export const V2GridView: React.FC<V2GridViewProps> = ({
   expandedGroups,
   toggleGroup
 }) => {
-  const { toggleCheck, handleSelectItem, checkedSongIds, handleQuickGenerate } = useUI();
-  const { handleRenameSong } = useLibrary();
+  const { toggleCheck, handleSelectItem, checkedSongIds, handleQuickGenerate } = useUIStore();
+  const { handleRenameSong } = useLibraryStore();
   const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
   const [hoveredActionsGroupKey, setHoveredActionsGroupKey] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

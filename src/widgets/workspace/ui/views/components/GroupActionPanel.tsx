@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThumbsUp, ThumbsDown, Pin, Trash2, X } from 'lucide-react';
-import { Song } from '../../../../../entities/song/model/types';
+import { Song } from '@/entities/song/model/types';
 
 interface GroupActionPanelProps {
   groupKey: string;

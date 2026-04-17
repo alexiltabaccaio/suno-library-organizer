@@ -1,9 +1,9 @@
 import React from 'react';
-import { SongItem } from '../../../../entities/song/ui/SongItem';
-import { SongGroup } from '../../../../features/library/hooks/useSongGrouping';
+import { SongItem } from '@/entities/song/ui/SongItem';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 import { V1GroupRow } from './components/V1GroupRow';
-import { useUI } from '../../../../features/ui/model/UIContext';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
 
 interface V1ListViewProps {
   groupedSongs: SongGroup[];
@@ -20,8 +20,8 @@ export const V1ListView: React.FC<V1ListViewProps> = ({
   expandedGroups,
   toggleGroup
 }) => {
-  const { toggleCheck, handleSelectItem, handleQuickGenerate } = useUI();
-  const { handleRenameSong } = useLibrary();
+  const { toggleCheck, handleSelectItem, handleQuickGenerate } = useUIStore();
+  const { handleRenameSong } = useLibraryStore();
 
   return (
     <>

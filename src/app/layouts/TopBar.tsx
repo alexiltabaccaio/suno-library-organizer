@@ -1,6 +1,6 @@
 import React from 'react';
 import { Music } from 'lucide-react';
-import { VersionSelector } from '../../shared/ui/VersionSelector';
+import { VersionSelector } from '@/shared/ui/VersionSelector';
 
 export const TopBar: React.FC = () => {
   return (

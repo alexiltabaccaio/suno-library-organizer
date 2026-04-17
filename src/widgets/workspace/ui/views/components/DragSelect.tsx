@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useUI } from '../../../../../features/ui/model/UIContext';
-import { useLibrary } from '../../../../../features/library/model/LibraryContext';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
 
 interface DragSelectProps {
   children: React.ReactNode;
@@ -8,8 +8,8 @@ interface DragSelectProps {
 }
 
 export const DragSelect: React.FC<DragSelectProps> = ({ children, containerRef }) => {
-  const { checkedSongIds, setCheckedSongIds } = useUI();
-  const { songs } = useLibrary();
+  const { checkedSongIds, setCheckedSongIds } = useUIStore();
+  const { songs } = useLibraryStore();
   const [isDragging, setIsDragging] = useState(false);
   const [dragOccurred, setDragOccurred] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -92,7 +92,7 @@ export const DragSelect: React.FC<DragSelectProps> = ({ children, containerRef }
       });
 
     // Apply selection logic
-    const nextSelection = new Set(initialSelection);
+    const nextSelection = new Set<string>(initialSelection);
     const isCtrlPressed = e.ctrlKey || e.metaKey;
 
     if (isCtrlPressed) {

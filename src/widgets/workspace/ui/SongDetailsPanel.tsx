@@ -1,10 +1,10 @@
-import React from 'react';
-import { X, Play, ThumbsUp, MessageSquare, Share, Music, Copy, ThumbsDown } from 'lucide-react';
-import { Song } from '../../../entities/song/model/types';
-import { TagBackdrop } from '../../../entities/song/ui/TagBackdrop';
-import { useEditor } from '../../../features/editor/model/EditorContext';
-import { useLibrary } from '../../../features/library/model/LibraryContext';
-import { useUI } from '../../../features/ui/model/UIContext';
+import React, { useState } from 'react';
+import { X, Play, ThumbsUp, MessageSquare, Share, Music, Copy, ThumbsDown, Pencil, Check } from 'lucide-react';
+import { Song } from '@/entities/song/model/types';
+import { TagBackdrop } from '@/entities/song/ui/TagBackdrop';
+import { useEditorStore } from '@/app/store/useEditorStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
 
 interface SongDetailsPanelProps {
   song: Song;
@@ -15,11 +15,39 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
   song, 
   onClose 
 }) => {
-  const { formattingMode } = useEditor();
-  const { handleToggleLike, handleToggleDislike } = useLibrary();
-  const { viewMode } = useUI();
+  const { formattingMode } = useEditorStore();
+  const { handleToggleLike, handleToggleDislike, handleRenameSong } = useLibraryStore();
+  const { viewMode } = useUIStore();
+
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState('');
+  
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [editCaptionValue, setEditCaptionValue] = useState('');
 
   const likeCount = Math.max(0, (song.isLiked ? 1 : 0) - (song.isDisliked ? 1 : 0));
+
+  const startEditTitle = () => {
+    setEditTitleValue(song.title);
+    setIsEditingTitle(true);
+  };
+
+  const saveTitle = () => {
+    if (editTitleValue.trim()) {
+      handleRenameSong(song.id, editTitleValue, true);
+    }
+    setIsEditingTitle(false);
+  };
+
+  const startEditCaption = () => {
+    setEditCaptionValue(song.isRenamed && song.notes ? song.notes : '');
+    setIsEditingCaption(true);
+  };
+
+  const saveCaption = () => {
+    handleRenameSong(song.id, editCaptionValue, false);
+    setIsEditingCaption(false);
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -79,13 +107,84 @@ export const SongDetailsPanel: React.FC<SongDetailsPanelProps> = ({
 
         {/* Title & Caption */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-zinc-100 mb-0.5">{song.title}</h2>
+          {isEditingTitle ? (
+            <div className="flex items-center gap-2 mb-0.5">
+              <input
+                autoFocus
+                value={editTitleValue}
+                onChange={(e) => setEditTitleValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveTitle();
+                  if (e.key === 'Escape') setIsEditingTitle(false);
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.select();
+                  e.currentTarget.setSelectionRange(0, e.currentTarget.value.length, 'backward');
+                }}
+                className="flex-1 bg-[#0047ab] font-bold text-zinc-100 px-1.5 py-1 rounded-sm outline-none border-b border-white text-xl"
+              />
+              <button onClick={saveTitle} className="p-1 px-1.5 text-zinc-100 hover:text-white shrink-0">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={() => setIsEditingTitle(false)} className="p-1 text-zinc-500 hover:text-zinc-300 shrink-0">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-0.5 group/title">
+              <h2 className="text-xl font-bold text-zinc-100 line-clamp-1 break-all">{song.title}</h2>
+              <button 
+                onClick={startEditTitle}
+                className="opacity-0 group-hover/title:opacity-100 text-zinc-500 hover:text-zinc-300 transition-opacity p-1"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {song.takeNumber && viewMode !== 'before' && (
             <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
               Take {song.takeNumber}
             </p>
           )}
-          <p className="text-sm text-zinc-500">Add a Caption</p>
+
+          {isEditingCaption ? (
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                autoFocus
+                placeholder="Add a Caption"
+                value={editCaptionValue}
+                onChange={(e) => setEditCaptionValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveCaption();
+                  if (e.key === 'Escape') setIsEditingCaption(false);
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.select();
+                  e.currentTarget.setSelectionRange(0, e.currentTarget.value.length, 'backward');
+                }}
+                className="flex-1 bg-[#0047ab] text-sm text-zinc-100 px-1.5 py-1 rounded-sm outline-none border-b border-white"
+              />
+              <button onClick={saveCaption} className="p-1 px-1.5 text-zinc-100 hover:text-white shrink-0">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={() => setIsEditingCaption(false)} className="p-1 text-zinc-500 hover:text-zinc-300 shrink-0">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div 
+              className="flex items-center gap-2 group/caption cursor-pointer mt-1"
+              onClick={startEditCaption}
+            >
+              <p className="text-sm text-zinc-500 hover:text-zinc-400 transition-colors line-clamp-2">
+                {song.isRenamed && song.notes ? song.notes : 'Add a Caption'}
+              </p>
+              <button className="opacity-0 group-hover/caption:opacity-100 text-zinc-500 hover:text-zinc-300 transition-opacity p-1">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Remix Button */}

@@ -2,15 +2,16 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TopBar } from './TopBar';
 import { CreateButton } from './CreateButton';
-import { WorkspaceArea } from '../../widgets/workspace/ui/WorkspaceArea';
-import { SongDetailsPanel } from '../../widgets/workspace/ui/SongDetailsPanel';
-import { EditorPanel } from '../../widgets/editor/ui/EditorPanel';
-import { useEditor } from '../../features/editor/model/EditorContext';
-import { useUI } from '../../features/ui/model/UIContext';
+import { WorkspaceArea } from '@/widgets/workspace/ui/WorkspaceArea';
+import { SongDetailsPanel } from '@/widgets/workspace/ui/SongDetailsPanel';
+import { EditorPanel } from '@/widgets/editor/ui/EditorPanel';
+import { useEditorStore } from '@/app/store/useEditorStore';
+import { useUIStore } from '@/app/store/useUIStore';
 
 export const DesktopLayout: React.FC = () => {
-  const { lyrics, styles } = useEditor();
-  const { selectedSong, handleCreate, closeDetails } = useUI();
+  const { lyrics, styles } = useEditorStore();
+  const { handleCreate, closeDetails, selectedSong: getSelectedSong } = useUIStore();
+  const selectedSong = getSelectedSong();
 
   return (
     <div className="h-screen w-full bg-[#101012] text-zinc-100 flex font-sans overflow-hidden">

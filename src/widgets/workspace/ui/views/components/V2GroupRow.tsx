@@ -1,12 +1,12 @@
 import React from 'react';
-import { SongItem } from '../../../../../entities/song/ui/SongItem';
-import { SongCard } from '../../../../../entities/song/ui/SongCard';
-import { SongGroup } from '../../../../../features/library/hooks/useSongGrouping';
-import { HorizontalScrollContainer } from '../../../../../shared/ui/HorizontalScrollContainer';
+import { SongItem } from '@/entities/song/ui/SongItem';
+import { SongCard } from '@/entities/song/ui/SongCard';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
+import { HorizontalScrollContainer } from '@/shared/ui/HorizontalScrollContainer';
 import { GroupActionPanel } from './GroupActionPanel';
-import { useLibrary } from '../../../../../features/library/model/LibraryContext';
-import { useUI } from '../../../../../features/ui/model/UIContext';
-import { useGroupRowLogic } from '../../../hooks/useGroupRowLogic';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useGroupRowLogic } from '@/widgets/workspace/hooks/useGroupRowLogic';
 
 interface V2GroupRowProps {
   group: SongGroup;
@@ -31,8 +31,8 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
   hoveredActionsGroupKey,
   setHoveredActionsGroupKey
 }) => {
-  const { handleToggleLike, handleToggleDislike, handleTogglePin, groupFavorites, handleRenameSong, handleSetFavorite, handleDelete } = useLibrary();
-  const { checkedSongIds, selectedSongId, selectedItemId, handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem, clearCheckedSongs } = useUI();
+  const { handleToggleLike, handleToggleDislike, handleTogglePin, groupFavorites, handleRenameSong, handleSetFavorite, handleDelete } = useLibraryStore();
+  const { checkedSongIds, selectedSongId, selectedItemId, handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem, clearCheckedSongs } = useUIStore();
   
   const groupFavoriteId = groupFavorites[group.key];
   const { 

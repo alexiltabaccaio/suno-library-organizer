@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
-import { isStructureTag } from '../../../features/editor/lib/tagUtils';
-import { TagBackdrop } from '../../../entities/song/ui/TagBackdrop';
+import { isStructureTag } from '@/features/editor/lib/tagUtils';
+import { TagBackdrop } from '@/entities/song/ui/TagBackdrop';
 import { InteractiveToolbar } from './textarea/InteractiveToolbar';
-import { useTextareaLineTracker } from '../../../features/editor/hooks/useTextareaLineTracker';
-import { useTagCycling } from '../../../features/editor/hooks/useTagCycling';
+import { useTextareaLineTracker } from '@/features/editor/hooks/useTextareaLineTracker';
+import { useTagCycling } from '@/features/editor/hooks/useTagCycling';
 
 export interface FormattedTextareaRef {
   setCursorPos: (pos: number) => void;

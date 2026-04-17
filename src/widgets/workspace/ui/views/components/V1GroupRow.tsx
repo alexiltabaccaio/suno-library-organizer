@@ -1,9 +1,9 @@
 import React from 'react';
-import { SongItem } from '../../../../../entities/song/ui/SongItem';
-import { SongGroup } from '../../../../../features/library/hooks/useSongGrouping';
-import { useUI } from '../../../../../features/ui/model/UIContext';
-import { useLibrary } from '../../../../../features/library/model/LibraryContext';
-import { useGroupRowLogic } from '../../../hooks/useGroupRowLogic';
+import { SongItem } from '@/entities/song/ui/SongItem';
+import { SongGroup } from '@/features/library/hooks/useSongGrouping';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useGroupRowLogic } from '@/widgets/workspace/hooks/useGroupRowLogic';
 
 interface V1GroupRowProps {
   group: SongGroup;
@@ -20,8 +20,8 @@ export const V1GroupRow: React.FC<V1GroupRowProps> = ({
   isExpanded,
   toggleGroup
 }) => {
-  const { handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem } = useUI();
-  const { groupFavorites, handleRenameSong, handleSetFavorite } = useLibrary();
+  const { handleQuickGenerate, toggleCheck, toggleGroupCheck, handleSelectItem } = useUIStore();
+  const { groupFavorites, handleRenameSong, handleSetFavorite } = useLibraryStore();
   
   const groupFavoriteId = groupFavorites[group.key];
   const { 
@@ -75,7 +75,7 @@ export const V1GroupRow: React.FC<V1GroupRowProps> = ({
       {isExpanded && (
         <div className="pl-8 relative mt-1">
           <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
-          <div className="space-y-1 max-h-[260px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-1 max-h-[650px] overflow-y-auto pr-2 scrollbar-hide">
             {paginatedSubSongs.map((song) => (
               <SongItem 
                 key={song.id}

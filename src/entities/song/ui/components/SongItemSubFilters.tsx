@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Filter, ThumbsUp, ThumbsDown, EyeOff, Check } from 'lucide-react';
-import { useUI } from '../../../../features/ui/model/UIContext';
+import { useUIStore } from '@/app/store/useUIStore';
 
 interface Props {
   showSubFilters: boolean;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const SongItemSubFilters: React.FC<Props> = ({ showSubFilters, setShowSubFilters }) => {
-  const { subFilters, toggleSubFilter } = useUI();
+  const { subFilters, toggleSubFilter } = useUIStore();
   const subFilterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

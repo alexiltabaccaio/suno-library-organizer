@@ -1,25 +1,19 @@
 import React from 'react';
-import { useIsMobile } from '../shared/hooks/useMediaQuery';
+import { useIsMobile } from '@/shared/hooks/useMediaQuery';
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { DesktopLayout } from './layouts/DesktopLayout';
 import { MobileLayout } from './layouts/MobileLayout';
-import { EditorProvider } from '../features/editor/model/EditorContext';
-import { LibraryProvider } from '../features/library/model/LibraryContext';
-import { UIProvider } from '../features/ui/model/UIContext';
 
 function AppContent() {
   const isMobile = useIsMobile();
+  useGlobalShortcuts();
+  
   return isMobile ? <MobileLayout /> : <DesktopLayout />;
 }
 
 export default function App() {
   return (
-    <EditorProvider>
-      <LibraryProvider>
-        <UIProvider>
-          <AppContent />
-        </UIProvider>
-      </LibraryProvider>
-    </EditorProvider>
+    <AppContent />
   );
 }
 

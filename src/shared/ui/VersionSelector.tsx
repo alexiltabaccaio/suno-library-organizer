@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { useEditor } from '../../features/editor/model/EditorContext';
+import { useEditorStore } from '@/app/store/useEditorStore';
 
 interface VersionSelectorProps {
   className?: string;
 }
 
 export const VersionSelector: React.FC<VersionSelectorProps> = ({ className }) => {
-  const { version, setVersion } = useEditor();
+  const { version, setVersion } = useEditorStore();
   const [isOpen, setIsOpen] = useState(false);
   const versions = ['v5.5', 'v5', 'v4.5', 'v4'];
 

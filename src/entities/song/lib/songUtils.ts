@@ -1,4 +1,4 @@
-import { Song } from '../model/types';
+import { Song } from '@/entities/song/model/types';
 
 /**
  * Generates a unique grouping key for a song based on its core metadata.

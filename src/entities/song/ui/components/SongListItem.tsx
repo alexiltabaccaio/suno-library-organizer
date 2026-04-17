@@ -1,9 +1,9 @@
 import React from 'react';
 import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, Star, Plus } from 'lucide-react';
-import { SongContextMenu } from '../../../../widgets/workspace/ui/SongContextMenu';
-import { useLibrary } from '../../../../features/library/model/LibraryContext';
-import { useUI } from '../../../../features/ui/model/UIContext';
-import { useGlobalTimeTick } from '../../../../shared/hooks/useGlobalTimeTick';
+import { SongContextMenu } from '@/widgets/workspace/ui/SongContextMenu';
+import { useLibraryStore } from '@/app/store/useLibraryStore';
+import { useUIStore } from '@/app/store/useUIStore';
+import { useGlobalTimeTick } from '@/shared/hooks/useGlobalTimeTick';
 import { SongItemProps } from '../types';
 import { useSongItemMenu } from '../hooks/useSongItemMenu';
 import { useSongItemEdit } from '../hooks/useSongItemEdit';
@@ -28,8 +28,8 @@ export const SongListItem: React.FC<SongItemProps> = ({
   isChild, isFavorite, onSetFavorite,
   isLiked, isDisliked, isPinned, createdAt, onQuickGenerate
 }) => {
-  const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibrary();
-  const { checkedSongIds, selectedItemId } = useUI();
+  const { handleToggleLike, handleToggleDislike, handleTogglePin } = useLibraryStore();
+  const { checkedSongIds, selectedItemId } = useUIStore();
 
   const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = isCheckedProp !== undefined ? isCheckedProp : checkedSongIds.has(id);
@@ -122,7 +122,7 @@ export const SongListItem: React.FC<SongItemProps> = ({
                       e.currentTarget.setSelectionRange(0, e.currentTarget.value.length, 'backward');
                     }}
                     className={`bg-[#0047ab] font-bold text-zinc-100 px-1.5 py-1 rounded-sm outline-none border-b border-white ${isChild ? 'text-[13px] sm:text-[14px] w-[180px] sm:w-[200px]' : 'text-[15px] sm:text-[16px] w-[220px] sm:w-[250px]'}`}
-                    placeholder={isChild ? "Add a note..." : "Enter title..."}
+                    placeholder={isChild ? "Add a Caption" : "Enter title..."}
                   />
                   <button 
                     onClick={handleConfirmEdit}
@@ -140,7 +140,7 @@ export const SongListItem: React.FC<SongItemProps> = ({
               ) : (
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className={`font-bold truncate transition-all duration-200 ease-out ${isChild ? (isRenamed ? 'text-zinc-100 text-[12px] sm:text-[13px]' : `text-zinc-600 text-[12px] sm:text-[13px] ${isSelected ? 'opacity-100 max-w-[180px] sm:max-w-[200px]' : 'opacity-0 max-w-0 lg:group-hover:opacity-100 lg:group-hover:max-w-[200px]'}`) : 'text-zinc-100 text-[15px] sm:text-[16px]'}`}>
-                    {isChild ? (isRenamed ? notes : 'Add a note...') : title}
+                    {isChild ? (isRenamed ? notes : 'Add a Caption') : title}
                   </h3>
                   <div className="flex items-center gap-1">
                     <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? (isChild ? 'w-5 opacity-100' : 'w-6 opacity-100') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>

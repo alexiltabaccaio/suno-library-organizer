@@ -2,23 +2,24 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Music, X, Type, Highlighter, Palette } from 'lucide-react';
 import { CreateButton } from './CreateButton';
-import { WorkspaceArea } from '../../widgets/workspace/ui/WorkspaceArea';
-import { SongDetailsPanel } from '../../widgets/workspace/ui/SongDetailsPanel';
-import { EditorPanel } from '../../widgets/editor/ui/EditorPanel';
-import { ActionButtons } from '../../widgets/editor/ui/ActionButtons';
-import { VersionSelector } from '../../shared/ui/VersionSelector';
-import { useEditor } from '../../features/editor/model/EditorContext';
-import { useUI } from '../../features/ui/model/UIContext';
+import { WorkspaceArea } from '@/widgets/workspace/ui/WorkspaceArea';
+import { SongDetailsPanel } from '@/widgets/workspace/ui/SongDetailsPanel';
+import { EditorPanel } from '@/widgets/editor/ui/EditorPanel';
+import { ActionButtons } from '@/widgets/editor/ui/ActionButtons';
+import { VersionSelector } from '@/shared/ui/VersionSelector';
+import { useEditorStore } from '@/app/store/useEditorStore';
+import { useUIStore } from '@/app/store/useUIStore';
 
 export const MobileLayout: React.FC = () => {
   const { 
     lyrics, styles, formattingMode, setFormattingMode
-  } = useEditor();
+  } = useEditorStore();
   
   const { 
-    selectedSong, isMobileEditorOpen, setIsMobileEditorOpen, 
-    handleCreate, closeDetails, viewMode, setViewMode
-  } = useUI();
+    isMobileEditorOpen, setIsMobileEditorOpen, 
+    handleCreate, closeDetails, viewMode, setViewMode, selectedSong: getSelectedSong
+  } = useUIStore();
+  const selectedSong = getSelectedSong();
 
   return (
     <div className="h-screen w-full bg-[#101012] text-zinc-100 flex font-sans overflow-hidden relative">
