@@ -1,9 +1,7 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Music, X, Type, Highlighter, Palette } from 'lucide-react';
 import { CreateButton } from './CreateButton';
 import { WorkspaceArea } from '@/widgets/workspace/ui/WorkspaceArea';
-import { SongDetailsPanel } from '@/widgets/workspace/ui/SongDetailsPanel';
 import { EditorPanel } from '@/widgets/editor/ui/EditorPanel';
 import { ActionButtons } from '@/widgets/editor/ui/ActionButtons';
 import { VersionSelector } from '@/shared/ui/VersionSelector';
@@ -17,9 +15,8 @@ export const MobileLayout: React.FC = () => {
   
   const { 
     isMobileEditorOpen, setIsMobileEditorOpen, 
-    handleCreate, closeDetails, viewMode, setViewMode, selectedSong: getSelectedSong
+    handleCreate, viewMode, setViewMode
   } = useUIStore();
-  const selectedSong = getSelectedSong();
 
   return (
     <div className="h-screen w-full bg-[#101012] text-zinc-100 flex font-sans overflow-hidden relative">
@@ -50,25 +47,6 @@ export const MobileLayout: React.FC = () => {
       <div className="flex-1 w-full h-full pb-24 overflow-hidden flex flex-col">
         <WorkspaceArea hideFooter />
       </div>
-
-      {/* Details Panel (Slide in) */}
-      <AnimatePresence>
-        {selectedSong && (
-          <motion.div 
-            key="mobile-details"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-40 bg-[#101012]"
-          >
-            <SongDetailsPanel 
-              song={selectedSong} 
-              onClose={closeDetails} 
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#141417] border-t border-zinc-800/50 z-30 px-4 pt-3 pb-2">

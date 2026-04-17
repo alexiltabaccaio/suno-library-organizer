@@ -81,7 +81,7 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
         </div>
 
         {/* Mobile Search Button */}
-        <button className="md:hidden w-10 h-10 rounded-full bg-[#19191b] flex items-center justify-center text-zinc-300 shrink-0">
+        <button className="md:hidden w-10 h-10 rounded-full bg-[#19191b] flex items-center justify-center text-zinc-500 shrink-0 opacity-40 grayscale pointer-events-none cursor-default">
           <Search className="w-4 h-4" />
         </button>
 

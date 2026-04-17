@@ -34,7 +34,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       </button>
 
       {showFilters && (
-        <div className="absolute top-full right-0 mt-2 w-52 bg-[#19191b] border border-zinc-800 rounded-xl shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute top-full left-0 md:right-0 md:left-auto mt-2 w-52 bg-[#19191b] border border-zinc-800 rounded-xl shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top-left md:origin-top-right">
           <button 
             onClick={() => toggleFilter('liked')}
             className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-zinc-800 transition-colors"
