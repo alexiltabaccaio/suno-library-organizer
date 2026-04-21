@@ -35,7 +35,7 @@ describe('useWorkspaceFilters', () => {
 
   it('should return all songs when no filters are active', () => {
     const { result } = renderHook(() => 
-      useWorkspaceFilters(mockGroups, mockSongs, defaultFilters, defaultFilters, {})
+      useWorkspaceFilters(mockGroups, mockSongs, defaultFilters, {})
     );
     expect(result.current.filteredSortedSongs).toHaveLength(3);
     expect(result.current.filteredGroupedSongs).toHaveLength(2);
@@ -44,7 +44,7 @@ describe('useWorkspaceFilters', () => {
   it('should filter by liked status in flat list', () => {
     const filters = { ...defaultFilters, liked: true };
     const { result } = renderHook(() => 
-      useWorkspaceFilters(mockGroups, mockSongs, filters, defaultFilters, {})
+      useWorkspaceFilters(mockGroups, mockSongs, filters, {})
     );
     expect(result.current.filteredSortedSongs).toHaveLength(1);
     expect(result.current.filteredSortedSongs[0].id).toBe('1');
@@ -55,7 +55,7 @@ describe('useWorkspaceFilters', () => {
     // Favorite of Group 1 is song '1' (which is liked)
     // Favorite of Group 2 is song '3' (which is NOT liked)
     const { result } = renderHook(() => 
-      useWorkspaceFilters(mockGroups, mockSongs, filters, defaultFilters, {
+      useWorkspaceFilters(mockGroups, mockSongs, filters, {
         'Song 1|Pop|A': '1'
       })
     );
@@ -68,7 +68,7 @@ describe('useWorkspaceFilters', () => {
     const filters = { ...defaultFilters, liked: true };
     // Set song '2' (unliked) as favorite for Group 1
     const { result } = renderHook(() => 
-      useWorkspaceFilters(mockGroups, mockSongs, filters, defaultFilters, {
+      useWorkspaceFilters(mockGroups, mockSongs, filters, {
         'Song 1|Pop|A': '2'
       })
     );
@@ -79,7 +79,7 @@ describe('useWorkspaceFilters', () => {
   it('should hide disliked songs when hideDisliked is active', () => {
     const filters = { ...defaultFilters, hideDisliked: true };
     const { result } = renderHook(() => 
-      useWorkspaceFilters(mockGroups, mockSongs, filters, defaultFilters, {})
+      useWorkspaceFilters(mockGroups, mockSongs, filters, {})
     );
     
     // Song '3' is disliked, so it should be filtered out

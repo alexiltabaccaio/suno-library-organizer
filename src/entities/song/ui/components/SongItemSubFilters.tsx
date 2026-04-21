@@ -3,12 +3,14 @@ import { Filter, ThumbsUp, ThumbsDown, EyeOff, Check } from 'lucide-react';
 import { useUIStore } from '@/app/store/useUIStore';
 
 interface Props {
+  groupKey: string;
   showSubFilters: boolean;
   setShowSubFilters: (show: boolean) => void;
 }
 
-export const SongItemSubFilters: React.FC<Props> = ({ showSubFilters, setShowSubFilters }) => {
-  const { subFilters, toggleSubFilter } = useUIStore();
+export const SongItemSubFilters: React.FC<Props> = ({ groupKey, showSubFilters, setShowSubFilters }) => {
+  const { groupSubFilters, toggleGroupSubFilter } = useUIStore();
+  const subFilters = groupSubFilters[groupKey] || { liked: false, disliked: false, hideDisliked: false };
   const subFilterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export const SongItemSubFilters: React.FC<Props> = ({ showSubFilters, setShowSub
           className="absolute top-full right-0 mt-2 w-48 bg-[#19191b] border border-zinc-800 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
         >
           <button 
-            onClick={() => toggleSubFilter('liked')}
+            onClick={() => toggleGroupSubFilter(groupKey, 'liked')}
             className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
           >
             <div className="flex items-center gap-2.5">
@@ -52,7 +54,7 @@ export const SongItemSubFilters: React.FC<Props> = ({ showSubFilters, setShowSub
           </button>
 
           <button 
-            onClick={() => toggleSubFilter('disliked')}
+            onClick={() => toggleGroupSubFilter(groupKey, 'disliked')}
             className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
           >
             <div className="flex items-center gap-2.5">
@@ -67,7 +69,7 @@ export const SongItemSubFilters: React.FC<Props> = ({ showSubFilters, setShowSub
           <div className="h-[1px] bg-zinc-800 my-1 mx-2" />
 
           <button 
-            onClick={() => toggleSubFilter('hideDisliked')}
+            onClick={() => toggleGroupSubFilter(groupKey, 'hideDisliked')}
             className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-800 transition-colors"
           >
             <div className="flex items-center gap-2.5">

@@ -12,7 +12,6 @@ export const useWorkspaceFilters = (
   groupedSongs: SongGroup[],
   sortedSongs: Song[],
   filters: Filters,
-  subFilters: Filters,
   groupFavorites: Record<string, string>
 ) => {
   const filteredGroupedSongs = useMemo(() => {

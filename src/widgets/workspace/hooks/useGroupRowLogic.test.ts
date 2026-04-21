@@ -19,7 +19,7 @@ describe('useGroupRowLogic', () => {
 
   beforeEach(() => {
     useUIStore.setState({
-      subFilters: { liked: false, disliked: false, hideDisliked: false },
+      groupSubFilters: {},
       groupPages: {},
       checkedSongIds: new Set()
     });
@@ -31,7 +31,7 @@ describe('useGroupRowLogic', () => {
   });
 
   it('should filter sub-songs by liked status', () => {
-    useUIStore.setState({ subFilters: { liked: true, disliked: false, hideDisliked: false } });
+    useUIStore.setState({ groupSubFilters: { 'group-key': { liked: true, disliked: false, hideDisliked: false } } });
     const { result } = renderHook(() => useGroupRowLogic(group));
     
     expect(result.current.paginatedSubSongs).toHaveLength(1);
@@ -39,7 +39,7 @@ describe('useGroupRowLogic', () => {
   });
 
   it('should hide disliked sub-songs when hideDisliked sub-filter is active', () => {
-    useUIStore.setState({ subFilters: { liked: false, disliked: false, hideDisliked: true } });
+    useUIStore.setState({ groupSubFilters: { 'group-key': { liked: false, disliked: false, hideDisliked: true } } });
     const { result } = renderHook(() => useGroupRowLogic(group));
     
     expect(result.current.paginatedSubSongs).toHaveLength(2);

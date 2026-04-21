@@ -19,7 +19,7 @@ interface WorkspaceAreaProps {
 export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false }) => {
   const { songs, groupFavorites } = useLibraryStore();
   const { 
-    viewMode, setViewMode, filters, toggleFilter, subFilters, 
+    viewMode, setViewMode, filters, toggleFilter, groupSubFilters, 
     clearItemSelection, expandedGroups, toggleGroup, selectedSong: getSelectedSong 
   } = useUIStore();
   const selectedSong = getSelectedSong();
@@ -31,9 +31,9 @@ export const WorkspaceArea: React.FC<WorkspaceAreaProps> = ({ hideFooter = false
 
   // Hooks for logic extraction
   const { sortedSongs, groupedSongs, songsWithTakeNumbers } = useSongGrouping(songs, groupFavorites);
-  const { filteredGroupedSongs, filteredSortedSongs } = useWorkspaceFilters(groupedSongs, sortedSongs, filters, subFilters, groupFavorites);
+  const { filteredGroupedSongs, filteredSortedSongs } = useWorkspaceFilters(groupedSongs, sortedSongs, filters, groupFavorites);
   const { currentPage, setCurrentPage, paginatedData } = useWorkspacePagination(viewMode, filteredSortedSongs, filteredGroupedSongs, ITEMS_PER_PAGE);
-  const visibleIds = useVisibleIds(viewMode, paginatedData.items, expandedGroups, subFilters);
+  const visibleIds = useVisibleIds(viewMode, paginatedData.items, expandedGroups, groupSubFilters);
 
   // Close filters when clicking outside
   useEffect(() => {

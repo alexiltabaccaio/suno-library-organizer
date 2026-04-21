@@ -152,6 +152,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
             />
 
             <SongGroupPagination 
+              groupKey={id}
               subPage={subPage}
               totalSubPages={totalSubPages}
               groupCount={groupCount}

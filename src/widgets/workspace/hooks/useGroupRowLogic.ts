@@ -3,8 +3,10 @@ import { useUIStore } from '@/app/store/useUIStore';
 import { SongGroup } from '@/features/library/hooks/useSongGrouping';
 
 export const useGroupRowLogic = (group: SongGroup, groupFavoriteId?: string) => {
-  const { subFilters, groupPages, setGroupPage, checkedSongIds } = useUIStore();
+  const { groupSubFilters, groupPages, setGroupPage, checkedSongIds } = useUIStore();
   const SUB_ITEMS_PER_PAGE = 15;
+
+  const subFilters = groupSubFilters[group.key] || { liked: false, disliked: false, hideDisliked: false };
 
   const favoriteSong = useMemo(() => {
     return group.songs.find(s => s.id === groupFavoriteId) || group.songs[0];

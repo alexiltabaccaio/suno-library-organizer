@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SongItemSubFilters } from '../SongItemSubFilters';
 
 interface SongGroupPaginationProps {
+  groupKey: string;
   subPage: number;
   totalSubPages: number;
   groupCount?: number;
@@ -12,6 +13,7 @@ interface SongGroupPaginationProps {
 }
 
 export const SongGroupPagination: React.FC<SongGroupPaginationProps> = ({
+  groupKey,
   subPage,
   totalSubPages,
   groupCount,
@@ -47,7 +49,11 @@ export const SongGroupPagination: React.FC<SongGroupPaginationProps> = ({
         </button>
       </div>
       
-      <SongItemSubFilters showSubFilters={showSubFilters} setShowSubFilters={setShowSubFilters} />
+      <SongItemSubFilters 
+        groupKey={groupKey}
+        showSubFilters={showSubFilters} 
+        setShowSubFilters={setShowSubFilters} 
+      />
     </div>
   );
 };

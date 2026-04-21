@@ -21,7 +21,7 @@ interface UIState {
   expandedGroups: Set<string>;
   
   filters: Filters;
-  subFilters: Filters;
+  groupSubFilters: Record<string, Filters>;
   groupPages: Record<string, number>;
 
   // Actions
@@ -44,9 +44,9 @@ interface UIState {
 
   // Filter Actions
   setFilters: (filters: Filters) => void;
-  setSubFilters: (filters: Filters) => void;
+  setGroupSubFilters: (groupKey: string, filters: Filters) => void;
   toggleFilter: (key: keyof Filters) => void;
-  toggleSubFilter: (key: keyof Filters) => void;
+  toggleGroupSubFilter: (groupKey: string, key: keyof Filters) => void;
   setGroupPage: (groupKey: string, page: number) => void;
 
   // Action Logic
@@ -67,7 +67,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   expandedGroups: new Set(),
   
   filters: { liked: false, disliked: false, hideDisliked: false },
-  subFilters: { liked: false, disliked: false, hideDisliked: false },
+  groupSubFilters: {},
   groupPages: {},
 
   setViewMode: (val) => set({ viewMode: val }),
@@ -221,15 +221,24 @@ export const useUIStore = create<UIState>((set, get) => ({
   }),
 
   setFilters: (filters) => set({ filters }),
-  setSubFilters: (filters) => set({ subFilters: filters }),
+  
+  setGroupSubFilters: (groupKey, filters) => set((state) => ({
+    groupSubFilters: { ...state.groupSubFilters, [groupKey]: filters }
+  })),
 
   toggleFilter: (key) => set((state) => ({
     filters: { ...state.filters, [key]: !state.filters[key] }
   })),
 
-  toggleSubFilter: (key) => set((state) => ({
-    subFilters: { ...state.subFilters, [key]: !state.subFilters[key] }
-  })),
+  toggleGroupSubFilter: (groupKey, key) => set((state) => {
+    const currentFilters = state.groupSubFilters[groupKey] || { liked: false, disliked: false, hideDisliked: false };
+    return {
+      groupSubFilters: {
+        ...state.groupSubFilters,
+        [groupKey]: { ...currentFilters, [key]: !currentFilters[key] }
+      }
+    };
+  }),
 
   setGroupPage: (groupKey, page) => set((state) => ({
     groupPages: { ...state.groupPages, [groupKey]: page }

@@ -12,7 +12,7 @@ export const useVisibleIds = (
   viewMode: string,
   paginatedItems: (Song | SongGroup)[],
   expandedGroups: Set<string>,
-  subFilters: Filters
+  groupSubFilters: Record<string, Filters>
 ) => {
   return useMemo(() => {
     if (viewMode === 'before') return (paginatedItems as Song[]).map(s => s.id);
@@ -24,6 +24,7 @@ export const useVisibleIds = (
       } else {
         ids.push(group.key);
         if (expandedGroups.has(group.key)) {
+          const subFilters = groupSubFilters[group.key] || { liked: false, disliked: false, hideDisliked: false };
           const filteredSubSongs = group.songs.filter((s: Song) => {
             if (subFilters.liked && !s.isLiked) return false;
             if (subFilters.disliked && !s.isDisliked) return false;
@@ -35,5 +36,5 @@ export const useVisibleIds = (
       }
     });
     return ids;
-  }, [viewMode, paginatedItems, expandedGroups, subFilters]);
+  }, [viewMode, paginatedItems, expandedGroups, groupSubFilters]);
 };
