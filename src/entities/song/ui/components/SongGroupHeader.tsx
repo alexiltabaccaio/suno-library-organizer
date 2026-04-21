@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Pin, Share, MoreHorizontal, Check, Pencil, X, ChevronDown, ChevronRight, ChevronLeft, Layers, Plus } from 'lucide-react';
+import { MoreHorizontal, Check, Pencil, ChevronDown, Layers } from 'lucide-react';
 import { SongContextMenu } from '@/widgets/workspace/ui/SongContextMenu';
 import { useLibraryStore } from '@/app/store/useLibraryStore';
 import { useUIStore } from '@/app/store/useUIStore';
@@ -7,6 +7,9 @@ import { SongItemProps } from '../types';
 import { useSongItemMenu } from '../hooks/useSongItemMenu';
 import { useSongItemEdit } from '../hooks/useSongItemEdit';
 import { SongItemSubFilters } from './SongItemSubFilters';
+import { SongTitleEditor } from './sub/SongTitleEditor';
+import { SongGroupActions } from './sub/SongGroupActions';
+import { SongGroupPagination } from './sub/SongGroupPagination';
 
 export const SongGroupHeader: React.FC<SongItemProps> = ({ 
   id, title, styles, duration, version, coverColor, takeNumber, isChecked: isCheckedProp, onClick, onCheck, onRename,
@@ -96,37 +99,12 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               {isEditing ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleConfirmEdit(e as any);
-                      if (e.key === 'Escape') handleCancelEdit(e as any);
-                    }}
-                    autoFocus
-                    onFocus={(e) => {
-                      e.currentTarget.select();
-                      e.currentTarget.setSelectionRange(0, e.currentTarget.value.length, 'backward');
-                    }}
-                    className="bg-[#0047ab] font-bold text-zinc-100 px-1.5 py-1 rounded-sm outline-none border-b border-white text-[15px] sm:text-[16px] w-[220px] sm:w-[250px]"
-                    placeholder="Enter title..."
-                  />
-                  <button 
-                    onClick={handleConfirmEdit}
-                    className="p-1.5 text-zinc-100 hover:text-white transition-colors shrink-0"
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleCancelEdit}
-                    className="p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                <SongTitleEditor 
+                  editTitle={editTitle}
+                  setEditTitle={setEditTitle}
+                  onConfirm={handleConfirmEdit}
+                  onCancel={handleCancelEdit}
+                />
               ) : (
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className="font-bold truncate transition-all duration-200 ease-out text-zinc-100 text-[15px] sm:text-[16px]">
@@ -135,7 +113,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
                   <div className="flex items-center gap-1 shrink-0">
                     <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? 'w-7 opacity-100' : 'w-0 opacity-0 lg:group-hover:opacity-100 lg:group-hover:w-7'}`}>
                       <button 
-                        onClick={handleStartEdit}
+                        onClick={(e) => { e.stopPropagation(); handleStartEdit(e as any); }}
                         className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
                       >
                         <Pencil className="w-4 h-4" />
@@ -161,68 +139,26 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
               {styles}
             </p>
           </div>
-          <div className="flex items-center gap-4 h-8">
-            {onQuickGenerate && (
-              <button 
-                onClick={onQuickGenerate}
-                className="text-zinc-600 hover:text-zinc-300 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            )}
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleToggleLike(id); }}
-              className={`transition-colors ${isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-            >
-              <ThumbsUp className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} />
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleToggleDislike(id); }}
-              className={`transition-colors ${isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-            >
-              <ThumbsDown className="w-4 h-4" fill={isDisliked ? "currentColor" : "none"} />
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleTogglePin(id); }}
-              className={`transition-colors ${isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
-            >
-              <Pin className="w-4 h-4" fill={isPinned ? "currentColor" : "none"} />
-            </button>
-            <button className="text-zinc-600 hover:text-zinc-300 transition-colors">
-              <Share className="w-4 h-4" />
-            </button>
+          <div className="flex items-center h-8">
+            <SongGroupActions
+              id={id}
+              isLiked={isLiked}
+              isDisliked={isDisliked}
+              isPinned={isPinned}
+              onToggleLike={handleToggleLike}
+              onToggleDislike={handleToggleDislike}
+              onTogglePin={handleTogglePin}
+              onQuickGenerate={(e) => { e.stopPropagation(); onQuickGenerate?.(e); }}
+            />
 
-            <div className="flex items-center gap-2">
-              <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
-              {/* Sub-pagination */}
-              <div className="flex items-center gap-0.5 bg-zinc-800/80 rounded-md px-1 py-0.5 shrink-0">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (subPage > 1) onSubPageChange?.(subPage - 1);
-                  }}
-                  disabled={subPage === 1}
-                  className={`p-0.5 transition-colors ${subPage === 1 ? 'text-zinc-700' : 'text-zinc-400 hover:text-zinc-200'}`}
-                >
-                  <ChevronLeft className="w-3 h-3" />
-                </button>
-                <span className="text-zinc-300 text-[10px] font-bold min-w-[10px] text-center">
-                  {subPage}
-                </span>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (subPage < totalSubPages) onSubPageChange?.((groupCount || 0) > 0 ? subPage + 1 : subPage);
-                  }}
-                  disabled={subPage === totalSubPages}
-                  className={`p-0.5 transition-colors ${subPage === totalSubPages ? 'text-zinc-700' : 'text-zinc-400 hover:text-zinc-200'}`}
-                >
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-              
-              <SongItemSubFilters showSubFilters={showSubFilters} setShowSubFilters={setShowSubFilters} />
-            </div>
+            <SongGroupPagination 
+              subPage={subPage}
+              totalSubPages={totalSubPages}
+              groupCount={groupCount}
+              onSubPageChange={onSubPageChange}
+              showSubFilters={showSubFilters}
+              setShowSubFilters={setShowSubFilters}
+            />
           </div>
         </div>
 

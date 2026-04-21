@@ -42,15 +42,15 @@ export const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps>
     if (!scrollRef.current) return;
     
     const isScrollable = scrollRef.current.scrollWidth > scrollRef.current.clientWidth;
+    const isOverCard = (e.target as HTMLElement).closest('.song-card');
 
-    if (isScrollable) {
-      // Prioritize scrolling if scrollable
+    if (isScrollable && isOverCard) {
+      // Only scroll if actually over a card and container is scrollable
       e.stopPropagation();
       setIsDragging(true);
       setStartX(e.pageX - scrollRef.current.offsetLeft);
       setScrollLeft(scrollRef.current.scrollLeft);
     }
-    // If not scrollable, let the event bubble to DragSelect
   };
 
   const handleMouseUp = () => setIsDragging(false);

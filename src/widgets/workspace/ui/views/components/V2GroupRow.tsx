@@ -44,6 +44,8 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
     setGroupPage 
   } = useGroupRowLogic(group, groupFavoriteId);
 
+  const hasGroupSelection = group.songs.some(s => checkedSongIds.has(s.id)) || group.songs.some(s => s.id === selectedItemId);
+
   return (
     <div className="space-y-1">
       <SongItem 
@@ -84,7 +86,7 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
       />
       
       {isExpanded && (
-        <div className="pl-8 relative mt-1 flex items-start group/actions">
+        <div className="pl-8 relative mt-1 flex items-start group/actions min-h-[98px]">
           <div className="absolute left-[26px] top-0 bottom-4 w-[1px] bg-zinc-800" />
           
           <GroupActionPanel 
@@ -105,7 +107,7 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
           />
 
           <div className="flex-1 min-w-0">
-            <HorizontalScrollContainer className="pl-[0px] gap-0 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 has-[.is-selected]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25">
+            <HorizontalScrollContainer className={`pl-[0px] gap-0 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 ${hasGroupSelection ? '[&_.song-card:not(:hover):not(.is-selected)]:opacity-25' : ''}`}>
               {paginatedSubSongs.map((song) => (
                 <SongCard 
                   key={song.id}

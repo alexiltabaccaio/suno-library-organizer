@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Check, Star, ThumbsUp, ThumbsDown, Pin } from 'lucide-react';
+import React from 'react';
+import { Check, Star } from 'lucide-react';
 import { SongContextMenu } from '@/widgets/workspace/ui/SongContextMenu';
-import { useLibraryStore } from '@/app/store/useLibraryStore';
 import { useUIStore } from '@/app/store/useUIStore';
+import { useSongItemMenu } from './hooks/useSongItemMenu';
 
 interface SongCardProps {
   id: string;
@@ -25,78 +25,15 @@ export const SongCard: React.FC<SongCardProps> = ({
   isFavorite, onSetFavorite, isLiked, isDisliked, isPinned, takeNumber,
   onMouseEnter, onMouseLeave
 }) => {
-  const { handleDelete, groupFavorites, songs, handleToggleLike, handleToggleDislike, handleTogglePin } = useLibraryStore();
   const { checkedSongIds, selectedItemId } = useUIStore();
 
   const isSelected = checkedSongIds.has(id) || selectedItemId === id;
   const isChecked = checkedSongIds.has(id);
-  const [showMenu, setShowMenu] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-
-  const handleMoreClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // This is now only used via context menu since button was removed
-  };
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setMenuAnchor(null);
-    setMenuPosition({ x: e.clientX, y: e.clientY });
-    setShowMenu(true);
-  };
-
-  const onDelete = () => {
-    if (checkedSongIds.has(id)) {
-      handleDelete(Array.from(checkedSongIds));
-    } else {
-      handleDelete([id]);
-    }
-  };
-
-  const onDeleteExcludeFavorite = () => {
-    if (checkedSongIds.has(id)) {
-      const favoriteIds = new Set(Object.values(groupFavorites));
-      const idsToDelete = (Array.from(checkedSongIds) as string[]).filter(itemId => {
-        if (favoriteIds.has(itemId)) return false;
-        if (itemId.includes('|')) return false;
-        return true;
-      });
-
-      const finalIdsToDelete: string[] = [...idsToDelete];
-      (Array.from(checkedSongIds) as string[]).forEach(itemId => {
-        if (itemId.includes('|')) {
-          const groupKey = itemId;
-          const groupSongs = songs.filter(s => `${s.title}|${s.styles}|${s.lyrics}` === groupKey);
-          const favId = groupFavorites[groupKey] || groupSongs[0]?.id;
-          groupSongs.forEach(s => {
-            if (s.id !== favId) finalIdsToDelete.push(s.id);
-          });
-        }
-      });
-
-      handleDelete(finalIdsToDelete);
-    }
-  };
-
-  const canExcludeFavorite = () => {
-    if (!checkedSongIds.has(id)) return false;
-    const selection = Array.from(checkedSongIds) as string[];
-    const favoriteIds = new Set(Object.values(groupFavorites));
-    
-    if (selection.length > 1) {
-      // Show only if there is at least one non-favorite song to delete
-      return selection.some(itemId => {
-        if (favoriteIds.has(itemId)) return false;
-        if (itemId.includes('|')) return false; // It's a group
-        return true;
-      });
-    }
-    
-    const singleId = selection[0];
-    return singleId.includes('|');
-  };
+  
+  const {
+    showMenu, setShowMenu, menuAnchor, menuPosition,
+    handleContextMenu, onDelete, onDeleteExcludeFavorite, canExcludeFavorite
+  } = useSongItemMenu(id, false);
 
   return (
     <>

@@ -12,7 +12,7 @@ vi.mock('@/app/store/useLibraryStore');
 describe('DragSelect', () => {
   const mockSetCheckedSongIds = vi.fn();
   const mockContainerRef = {
-    current: document.createElement('div')
+    current: document.createElement('div') as HTMLDivElement
   };
 
   const mockSongs = [
@@ -98,7 +98,7 @@ describe('DragSelect', () => {
     );
 
     const dragContainer = container.firstChild as HTMLElement;
-    mockContainerRef.current = dragContainer;
+    mockContainerRef.current = dragContainer as any;
 
     const item = screen.getByTestId('item-1');
     item.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -141,7 +141,7 @@ describe('DragSelect', () => {
     );
 
     const dragContainer = container.firstChild as HTMLElement;
-    mockContainerRef.current = dragContainer;
+    mockContainerRef.current = dragContainer as any;
 
     const item = screen.getByTestId('item-out');
     item.getBoundingClientRect = vi.fn().mockReturnValue({
