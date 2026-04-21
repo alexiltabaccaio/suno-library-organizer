@@ -40,9 +40,17 @@ export const HorizontalScrollContainer: React.FC<HorizontalScrollContainerProps>
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
+    
+    const isScrollable = scrollRef.current.scrollWidth > scrollRef.current.clientWidth;
+
+    if (isScrollable) {
+      // Prioritize scrolling if scrollable
+      e.stopPropagation();
+      setIsDragging(true);
+      setStartX(e.pageX - scrollRef.current.offsetLeft);
+      setScrollLeft(scrollRef.current.scrollLeft);
+    }
+    // If not scrollable, let the event bubble to DragSelect
   };
 
   const handleMouseUp = () => setIsDragging(false);

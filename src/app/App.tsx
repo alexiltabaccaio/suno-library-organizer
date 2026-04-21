@@ -1,8 +1,8 @@
 import React from 'react';
 import { useIsMobile } from '@/shared/hooks/useMediaQuery';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
-import { DesktopLayout } from './layouts/DesktopLayout';
-import { MobileLayout } from './layouts/MobileLayout';
+import { DesktopLayout } from '@/widgets/layout/ui/DesktopLayout';
+import { MobileLayout } from '@/widgets/layout/ui/MobileLayout';
 
 function AppContent() {
   const isMobile = useIsMobile();

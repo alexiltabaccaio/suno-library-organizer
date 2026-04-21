@@ -49,7 +49,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
         }`}
       >
         {/* Left Column: Selection & Expand */}
-        <div className="relative flex items-center justify-center shrink-0 w-2 sm:w-3 h-10">
+        <div className="relative flex items-center justify-center shrink-0 w-4 sm:w-3 h-10">
           <div className="absolute -top-4 flex items-center justify-center w-full">
             <button 
               onClick={(e) => {
@@ -58,7 +58,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
               }}
               className="p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
             >
-              <ChevronDown className={`w-3 sm:w-3.5 h-3 sm:h-3.5 transition-transform ${!isExpanded ? '-rotate-90' : ''}`} />
+              <ChevronDown className={`w-4 sm:w-3.5 h-4 sm:h-3.5 transition-transform ${!isExpanded ? '-rotate-90' : ''}`} />
             </button>
           </div>
           
@@ -68,12 +68,12 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[2px] border flex items-center justify-center ${
+            className={`w-4 h-4 sm:w-3 sm:h-3 rounded-[2px] border flex items-center justify-center transition-all ${
             isChecked 
-              ? 'opacity-100 bg-zinc-100 border-zinc-100' 
-              : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
+              ? 'opacity-100 bg-zinc-100 border-zinc-100 pointer-events-auto' 
+              : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none lg:group-hover:opacity-100 lg:group-hover:pointer-events-auto'}`
           }`}>
-            {isChecked && <Check className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-black stroke-[5]" />}
+            {isChecked && <Check className="w-3 h-3 sm:w-2 sm:h-2 text-black stroke-[5]" />}
           </div>
         </div>
 
@@ -132,8 +132,8 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
                   <h3 className="font-bold truncate transition-all duration-200 ease-out text-zinc-100 text-[15px] sm:text-[16px]">
                     {title}
                   </h3>
-                  <div className="flex items-center gap-1">
-                    <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? 'w-6 opacity-100' : 'w-0 opacity-0 lg:group-hover:opacity-100 lg:group-hover:w-6'}`}>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? 'w-7 opacity-100' : 'w-0 opacity-0 lg:group-hover:opacity-100 lg:group-hover:w-7'}`}>
                       <button 
                         onClick={handleStartEdit}
                         className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"

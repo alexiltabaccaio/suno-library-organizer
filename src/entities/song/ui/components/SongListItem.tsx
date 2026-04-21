@@ -60,14 +60,14 @@ export const SongListItem: React.FC<SongItemProps> = ({
         } ${isChild ? 'py-1 sm:py-1.5' : ''}`}
       >
         {/* Left Column: Selection & Favorite */}
-        <div className="relative flex items-center justify-center shrink-0 w-2 sm:w-3 h-10">
+        <div className="relative flex items-center justify-center shrink-0 w-4 sm:w-3 h-10">
           {isChild && (
             <div className={`absolute -top-3 flex items-center overflow-hidden ${isFavorite || isSelected ? 'h-4 opacity-100' : 'h-0 opacity-0 lg:group-hover:h-4 lg:group-hover:opacity-100'}`}>
               <button 
                 onClick={(e) => { e.stopPropagation(); onSetFavorite?.(e); }}
                 className={`p-0.5 transition-colors ${isFavorite ? 'text-yellow-500' : 'text-zinc-500 hover:text-zinc-300'}`}
               >
-                <Star className="w-2.5 h-2.5 sm:w-3 h-3" fill={isFavorite ? "currentColor" : "none"} />
+                <Star className="w-3.5 h-3.5 sm:w-3 h-3" fill={isFavorite ? "currentColor" : "none"} />
               </button>
             </div>
           )}
@@ -78,12 +78,12 @@ export const SongListItem: React.FC<SongItemProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[2px] border flex items-center justify-center ${
+            className={`w-4 h-4 sm:w-3 sm:h-3 rounded-[2px] border flex items-center justify-center transition-all ${
             isChecked 
-              ? 'opacity-100 bg-zinc-100 border-zinc-100' 
-              : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
+              ? 'opacity-100 bg-zinc-100 border-zinc-100 pointer-events-auto' 
+              : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none lg:group-hover:opacity-100 lg:group-hover:pointer-events-auto'}`
           }`}>
-            {isChecked && <Check className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-black stroke-[5]" />}
+            {isChecked && <Check className="w-3 h-3 sm:w-2 sm:h-2 text-black stroke-[5]" />}
           </div>
         </div>
 
@@ -142,8 +142,8 @@ export const SongListItem: React.FC<SongItemProps> = ({
                   <h3 className={`font-bold truncate transition-all duration-200 ease-out ${isChild ? (isRenamed ? 'text-zinc-100 text-[12px] sm:text-[13px]' : `text-zinc-600 text-[12px] sm:text-[13px] ${isSelected ? 'opacity-100 max-w-[180px] sm:max-w-[200px]' : 'opacity-0 max-w-0 lg:group-hover:opacity-100 lg:group-hover:max-w-[200px]'}`) : 'text-zinc-100 text-[15px] sm:text-[16px]'}`}>
                     {isChild ? (isRenamed ? notes : 'Add a Caption') : title}
                   </h3>
-                  <div className="flex items-center gap-1">
-                    <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? (isChild ? 'w-5 opacity-100' : 'w-6 opacity-100') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-5' : 'lg:group-hover:w-6'}`}>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <div className={`flex items-center overflow-hidden transition-all duration-200 ease-out ${isSelected ? (isChild ? 'w-6 opacity-100' : 'w-7 opacity-100') : 'w-0 opacity-0 lg:group-hover:opacity-100'} ${isChild ? 'lg:group-hover:w-6' : 'lg:group-hover:w-7'}`}>
                       <button 
                         onClick={handleStartEdit}
                         className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
