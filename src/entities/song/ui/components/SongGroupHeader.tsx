@@ -47,7 +47,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
         }}
         onContextMenu={handleContextMenu}
         data-selectable-id={id}
-        className={`relative flex items-center gap-2 sm:gap-4 p-1.5 sm:p-2 rounded-xl group cursor-pointer ${
+        className={`relative flex items-center gap-2 sm:gap-4 p-1 md:p-1.5 sm:p-2 rounded-xl group cursor-pointer ${
           isSelected ? 'bg-zinc-800/80' : 'hover:bg-zinc-900/40'
         }`}
       >
@@ -71,12 +71,12 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`w-4 h-4 sm:w-3 sm:h-3 rounded-[2px] border flex items-center justify-center transition-all ${
+            className={`w-3 h-3 rounded-[2px] border flex items-center justify-center transition-all ${
             isChecked 
               ? 'opacity-100 bg-zinc-100 border-zinc-100 pointer-events-auto' 
               : `border-zinc-700 bg-transparent ${isSelected ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none lg:group-hover:opacity-100 lg:group-hover:pointer-events-auto'}`
           }`}>
-            {isChecked && <Check className="w-3 h-3 sm:w-2 sm:h-2 text-black stroke-[5]" />}
+            {isChecked && <Check className="w-2 h-2 text-black stroke-[5]" />}
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export const SongGroupHeader: React.FC<SongItemProps> = ({
             </svg>
           </div>
           
-          <div className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[10px] px-1.5 py-0.5">
+          <div className="absolute bottom-1 right-1 md:bottom-1.5 md:right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[9px] px-1 py-0.5 md:text-[10px] md:px-1.5">
             {duration}
           </div>
         </div>

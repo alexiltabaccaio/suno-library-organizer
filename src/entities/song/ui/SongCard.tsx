@@ -46,7 +46,7 @@ export const SongCard: React.FC<SongCardProps> = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         data-selectable-id={id}
-        className={`relative flex items-center group cursor-pointer py-1.5 px-1 song-card ${isSelected ? 'is-selected' : ''}`}
+        className={`relative flex items-center group cursor-pointer py-1 md:py-1.5 px-1 song-card ${isSelected ? 'is-selected' : ''}`}
       >
         {/* Artwork Container */}
         <div className={`relative w-(--song-w-child) h-(--song-h-child) rounded-xl shrink-0 overflow-hidden bg-gradient-to-tr ${coverColor} shadow-lg`}>
@@ -56,7 +56,7 @@ export const SongCard: React.FC<SongCardProps> = ({
               e.stopPropagation();
               onCheck?.(e);
             }}
-            className={`absolute left-[6.8px] top-1/2 -translate-y-1/2 z-30 w-3 h-3 rounded-[2px] border flex items-center justify-center ${
+            className={`absolute left-[3px] md:left-[6.3px] top-1/2 -translate-y-1/2 z-30 w-3 h-3 rounded-[2px] border flex items-center justify-center ${
             isChecked 
               ? 'opacity-100 bg-zinc-100 border-zinc-100' 
               : `border-white/40 bg-black/20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`
@@ -65,7 +65,7 @@ export const SongCard: React.FC<SongCardProps> = ({
           </div>
 
           {/* Favorite Star - Top Left */}
-          <div className={`absolute left-1 top-1 z-30 flex items-center ${isFavorite || isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
+          <div className={`absolute left-[0px] md:left-[2.90px] top-[2.5px] md:top-[3px] z-30 flex items-center ${isFavorite || isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}>
             <button 
               onClick={(e) => { e.stopPropagation(); onSetFavorite?.(e); }}
               className={`p-0.5 transition-colors drop-shadow-md ${isFavorite ? 'text-yellow-500' : 'text-white/70 hover:text-white'}`}
@@ -82,13 +82,13 @@ export const SongCard: React.FC<SongCardProps> = ({
           </div>
           
           {/* Duration Badge */}
-          <div className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[8px] px-1 py-0.5">
+          <div className="absolute bottom-1 right-1 md:bottom-1.5 md:right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[7px] md:text-[8px] px-0.5 md:px-1 py-0.5">
             {duration}
           </div>
 
           {/* Take Badge */}
           {takeNumber && (
-            <div className="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[8px] px-1 py-0.5">
+            <div className="absolute top-1 right-1 md:top-1.5 md:right-1.5 bg-black/60 backdrop-blur-sm text-white font-bold rounded text-[7px] md:text-[8px] px-0.5 md:px-1 py-0.5">
               T{takeNumber}
             </div>
           )}

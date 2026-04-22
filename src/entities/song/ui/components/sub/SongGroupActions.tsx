@@ -23,35 +23,35 @@ export const SongGroupActions: React.FC<SongGroupActionsProps> = ({
   onQuickGenerate
 }) => {
   return (
-    <div className="flex items-center gap-4 h-8" onClick={(e) => e.stopPropagation()}>
+    <div className="flex items-center gap-2 md:gap-4 h-8" onClick={(e) => e.stopPropagation()}>
       {onQuickGenerate && (
         <button 
           onClick={onQuickGenerate}
           className="text-zinc-600 hover:text-zinc-300 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
         </button>
       )}
       <button 
         onClick={() => onToggleLike(id)}
         className={`transition-colors ${isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <ThumbsUp className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} />
+        <ThumbsUp className="w-3.5 h-3.5 md:w-4 md:h-4" fill={isLiked ? "currentColor" : "none"} />
       </button>
       <button 
         onClick={() => onToggleDislike(id)}
         className={`transition-colors ${isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <ThumbsDown className="w-4 h-4" fill={isDisliked ? "currentColor" : "none"} />
+        <ThumbsDown className="w-3.5 h-3.5 md:w-4 md:h-4" fill={isDisliked ? "currentColor" : "none"} />
       </button>
       <button 
         onClick={() => onTogglePin(id)}
         className={`transition-colors ${isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <Pin className="w-4 h-4" fill={isPinned ? "currentColor" : "none"} />
+        <Pin className="w-3.5 h-3.5 md:w-4 md:h-4" fill={isPinned ? "currentColor" : "none"} />
       </button>
       <button className="text-zinc-600 hover:text-zinc-300 transition-colors">
-        <Share className="w-4 h-4" />
+        <Share className="w-3.5 h-3.5 md:w-4 md:h-4" />
       </button>
     </div>
   );

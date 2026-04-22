@@ -26,7 +26,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     <div className="relative" ref={filterRef}>
       <button 
         onClick={() => setShowFilters(!showFilters)}
-        className={`flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full ${showFilters ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-300'}`}
+        className={`flex items-center gap-1.5 bg-[#19191b] hover:bg-zinc-800 transition-colors px-3 py-1.5 md:px-3 md:py-1.5 h-8 md:h-10 rounded-full text-xs md:text-sm ${showFilters ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-300'}`}
       >
         <Filter className="w-4 h-4 md:w-3.5 md:h-3.5" />
         <span className="hidden md:inline">Filters ({Object.values(filters).filter(Boolean).length})</span>

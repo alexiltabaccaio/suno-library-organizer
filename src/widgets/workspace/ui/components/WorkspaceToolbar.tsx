@@ -37,8 +37,8 @@ export const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
       </div>
 
       {/* Mobile Search Button (Disabled Visual) */}
-      <button className="md:hidden w-10 h-10 rounded-full bg-[#19191b] flex items-center justify-center text-zinc-500 shrink-0 opacity-40 grayscale pointer-events-none cursor-default">
-        <Search className="w-4 h-4" />
+      <button className="md:hidden w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#19191b] flex items-center justify-center text-zinc-500 shrink-0 opacity-40 grayscale pointer-events-none cursor-default">
+        <Search className="w-3.5 h-3.5" />
       </button>
 
       <div className="flex items-center gap-2 text-sm flex-1 md:flex-none justify-between md:justify-end">
@@ -51,8 +51,8 @@ export const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
             filterRef={filterRef}
           />
 
-          <button className="flex items-center gap-1.5 bg-[#19191b] px-3 py-1.5 md:px-3 md:py-1.5 h-10 rounded-full text-zinc-500 opacity-40 grayscale pointer-events-none cursor-default">
-            <ListFilter className="w-4 h-4 md:w-3.5 md:h-3.5" />
+          <button className="flex items-center gap-1.5 bg-[#19191b] px-3 py-1.5 md:px-3 md:py-1.5 h-8 md:h-10 rounded-full text-zinc-500 opacity-40 grayscale pointer-events-none cursor-default text-xs md:text-sm">
+            <ListFilter className="w-3.5 h-3.5 md:w-3.5 md:h-3.5" />
             <span className="hidden md:inline">Newest</span>
             <ChevronDown className="w-3.5 h-3.5 ml-0.5 text-zinc-500" />
           </button>
@@ -64,7 +64,7 @@ export const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
           <button className="px-3 py-1 text-zinc-500">Uploads</button>
         </div>
 
-        <div className="flex items-center gap-1 bg-[#19191b] rounded-full px-2 h-10">
+        <div className="flex items-center gap-1 bg-[#19191b] rounded-full px-2 h-8 md:h-10">
           <button 
             onClick={() => onPageChange(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}

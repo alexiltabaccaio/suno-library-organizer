@@ -4,10 +4,10 @@ import { ChevronRight, Pencil } from 'lucide-react';
 export const WorkspaceHeader: React.FC = () => {
   return (
     <div 
-      className="px-4 pt-6 pb-4 flex items-center justify-between opacity-40 grayscale pointer-events-none cursor-default"
+      className="px-4 pt-3 pb-2 md:pt-6 md:pb-4 flex items-center justify-between opacity-40 grayscale pointer-events-none cursor-default"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center gap-2 text-[15px] font-medium">
+      <div className="flex items-center gap-2 text-[13px] md:text-[15px] font-medium">
         <span className="text-zinc-500">Workspaces</span>
         <ChevronRight className="w-4 h-4 text-zinc-600" />
         <span className="text-zinc-500">Test</span>

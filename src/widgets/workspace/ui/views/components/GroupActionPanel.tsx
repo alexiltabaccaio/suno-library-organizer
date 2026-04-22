@@ -72,12 +72,12 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
     <div 
       onMouseEnter={() => onHoverActions(groupKey)}
       onMouseLeave={() => onHoverActions(null)}
-      className={`relative flex flex-col items-center gap-3 py-2 mr-2 w-6 shrink-0 z-10 transition-opacity duration-200 ${
+      className={`relative flex flex-col items-center gap-2 md:gap-3 py-2 mr-0 md:mr-1.5 w-6 shrink-0 z-10 transition-opacity duration-200 ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       {/* New Column: Bulk Actions (Trash & X) */}
-      <div className={`absolute -left-7 top-2 flex flex-col items-center gap-3 transition-opacity duration-200 ${hasChecked ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute -left-7 top-2 flex flex-col items-center gap-2 md:gap-3 transition-opacity duration-200 ${hasChecked ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={(e) => {
             e.stopPropagation();
@@ -88,7 +88,7 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
           className="text-zinc-600 hover:text-red-400 transition-colors"
           title="Delete selected sub-cards"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
         </button>
         <button 
           onClick={(e) => {
@@ -98,7 +98,7 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
           className="text-zinc-600 hover:text-zinc-300 transition-colors"
           title="Cancel selection"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3 h-3 md:w-3.5 md:h-3.5" />
         </button>
       </div>
 
@@ -109,7 +109,7 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
         }}
         className={`transition-colors ${displayState.isLiked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <ThumbsUp className="w-3.5 h-3.5" fill={displayState.isLiked ? "currentColor" : "none"} />
+        <ThumbsUp className="w-3 h-3 md:w-3.5 md:h-3.5" fill={displayState.isLiked ? "currentColor" : "none"} />
       </button>
       <button 
         onClick={(e) => { 
@@ -118,7 +118,7 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
         }}
         className={`transition-colors ${displayState.isDisliked ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <ThumbsDown className="w-3.5 h-3.5" fill={displayState.isDisliked ? "currentColor" : "none"} />
+        <ThumbsDown className="w-3 h-3 md:w-3.5 md:h-3.5" fill={displayState.isDisliked ? "currentColor" : "none"} />
       </button>
       <button 
         onClick={(e) => { 
@@ -127,7 +127,7 @@ export const GroupActionPanel: React.FC<GroupActionPanelProps> = ({
         }}
         className={`transition-colors ${displayState.isPinned ? 'text-zinc-100' : 'text-zinc-600 hover:text-zinc-300'}`}
       >
-        <Pin className="w-3.5 h-3.5" fill={displayState.isPinned ? "currentColor" : "none"} />
+        <Pin className="w-3 h-3 md:w-3.5 md:h-3.5" fill={displayState.isPinned ? "currentColor" : "none"} />
       </button>
     </div>
   );

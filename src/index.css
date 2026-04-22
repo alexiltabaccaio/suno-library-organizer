@@ -9,10 +9,10 @@
 
 @media (max-width: 640px) {
   :root {
-    --song-h: 72px;
-    --song-w: 56px;
-    --song-h-child: 62px;
-    --song-w-child: 48px;
+    --song-h: 68px;
+    --song-w: 52px;
+    --song-h-child: 56px;
+    --song-w-child: 44px;
   }
 }
 

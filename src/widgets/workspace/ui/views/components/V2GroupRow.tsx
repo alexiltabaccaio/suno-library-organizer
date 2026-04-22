@@ -107,7 +107,7 @@ export const V2GroupRow: React.FC<V2GroupRowProps> = ({
           />
 
           <div className="flex-1 min-w-0">
-            <HorizontalScrollContainer className={`pl-[0px] gap-0 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 ${hasGroupSelection ? '[&_.song-card:not(:hover):not(.is-selected)]:opacity-25' : ''}`}>
+            <HorizontalScrollContainer className={`pl-0 gap-0 has-[.song-card:hover]:[&_.song-card:not(:hover):not(.is-selected)]:opacity-25 ${hasGroupSelection ? '[&_.song-card:not(:hover):not(.is-selected)]:opacity-25' : ''}`}>
               {paginatedSubSongs.map((song) => (
                 <SongCard 
                   key={song.id}
